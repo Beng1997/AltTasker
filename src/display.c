@@ -242,7 +242,7 @@ void display_command_menu(SortMode current_sort, const char* filter_user, int sc
     
     printf("\n");
     printf("%s  ╔══════════════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET, config_get_border_color());
-    printf("%s  ║ " COLOR_RESET COLOR_BOLD COLOR_YELLOW "Commands" COLOR_RESET "%s                                                                              ║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
+    printf("%s  ║ " COLOR_RESET COLOR_BOLD COLOR_YELLOW "Commands" COLOR_RESET "                                                                              %s║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
     printf("%s  ╠══════════════════════════════════════════════════════════════════════════════════════╣\n" COLOR_RESET, config_get_border_color());
     
     // Sort options with highlighted current mode
@@ -261,23 +261,33 @@ void display_command_menu(SortMode current_sort, const char* filter_user, int sc
         default: sort_indicator = COLOR_GREEN "PID↓" COLOR_RESET; break;
     }
     
-    printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Sort:" COLOR_RESET " %sID  %sPU  %semory  %sser" "%s     Current: %s                                %s║\n" COLOR_RESET, 
-           config_get_border_color(), sort_p, sort_c, sort_m, sort_u, config_get_border_color(), sort_indicator, config_get_border_color());
+    // Sort: PID  CPU  Memory  User     Current: MEM↓                                (86 chars)
+    printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Sort:" COLOR_RESET " %sID  %sPU  %semory  %sser     Current: %s                                %s║\n" COLOR_RESET, 
+           config_get_border_color(), sort_p, sort_c, sort_m, sort_u, sort_indicator, config_get_border_color());
     
-    // Filter options with color
+    // Filter: F User  R Reset                                                       (86 chars)
     if (filter_user && strlen(filter_user) > 0) {
-        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_GREEN "Active: %s" COLOR_RESET "                                                       %s║\n" COLOR_RESET, config_get_border_color(), filter_user, config_get_border_color());
+        // Filter: Active: username
+        char filter_line[128];
+        int remaining = 86 - 16 - (int)strlen(filter_user);  // 86 total - "Filter: Active: " - username length
+        if (remaining < 0) remaining = 0;
+        snprintf(filter_line, sizeof(filter_line), "%*s", remaining, "");
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_GREEN "Active: %s" COLOR_RESET "%s%s║\n" COLOR_RESET, 
+               config_get_border_color(), filter_user, filter_line, config_get_border_color());
     } else {
-        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_BOLD "F" COLOR_RESET " User  " COLOR_BOLD "R" COLOR_RESET " Reset                                                       %s║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_BOLD "F" COLOR_RESET " User  " COLOR_BOLD "R" COLOR_RESET " Reset                                                       %s║\n" COLOR_RESET, 
+               config_get_border_color(), config_get_border_color());
     }
     
-    // Navigation with scroll info
+    // Navigate: ↑/↓ Line  PgUp/PgDn Page  Home/End Top/Bottom                     (86 chars)
     if (total_processes > 20) {
-        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Navigate:" COLOR_RESET " " COLOR_BOLD "↑" COLOR_RESET "/" COLOR_BOLD "↓" COLOR_RESET " Line  " COLOR_BOLD "PgUp" COLOR_RESET "/" COLOR_BOLD "PgDn" COLOR_RESET " Page  " COLOR_BOLD "Home" COLOR_RESET "/" COLOR_BOLD "End" COLOR_RESET " Top/Bottom                     %s║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Navigate:" COLOR_RESET " " COLOR_BOLD "↑" COLOR_RESET "/" COLOR_BOLD "↓" COLOR_RESET " Line  " COLOR_BOLD "PgUp" COLOR_RESET "/" COLOR_BOLD "PgDn" COLOR_RESET " Page  " COLOR_BOLD "Home" COLOR_RESET "/" COLOR_BOLD "End" COLOR_RESET " Top/Bottom                     %s║\n" COLOR_RESET, 
+               config_get_border_color(), config_get_border_color());
     }
     
-    // Actions with color coding
-    printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Actions:" COLOR_RESET " " COLOR_RED "K" COLOR_RESET " Kill  " COLOR_CYAN "S" COLOR_RESET " Search  " COLOR_BOLD "Q" COLOR_RESET "/" COLOR_BOLD "Ctrl+C" COLOR_RESET " Quit                              %s║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
+    // Actions: K Kill  S Search  Q/Ctrl+C Quit                              (86 chars)
+    printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Actions:" COLOR_RESET " " COLOR_RED "K" COLOR_RESET " Kill  " COLOR_CYAN "S" COLOR_RESET " Search  " COLOR_BOLD "Q" COLOR_RESET "/" COLOR_BOLD "Ctrl+C" COLOR_RESET " Quit                              %s║\n" COLOR_RESET, 
+           config_get_border_color(), config_get_border_color());
     printf("%s  ╚══════════════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET, config_get_border_color());
     printf(COLOR_BOLD "  Auto-refresh: 2s" COLOR_RESET "  |  Press any key above to execute\n");
 }
