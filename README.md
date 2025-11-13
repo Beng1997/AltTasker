@@ -1,5 +1,10 @@
 # AltTasker
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-2.2-blue.svg)](https://github.com/Beng1997/AltTasker/releases)
+[![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://github.com/Beng1997/AltTasker)
+[![Language](https://img.shields.io/badge/language-C-orange.svg)](https://github.com/Beng1997/AltTasker)
+
 A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your system processes with a beautiful, colorful terminal interface.
 
 **Platform Support:** Native Linux systems (Ubuntu, Debian, Fedora, Arch, etc.) and WSL (Windows Subsystem for Linux).
