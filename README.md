@@ -41,7 +41,21 @@ A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your sy
 - 📊 **System overview** - Uptime, process count, memory usage bar
 - 🌈 **Theme customization** - Choose your preferred color scheme
 
-## 🚀 Quick Start
+## � Screenshots
+
+### Main Interface with Memory Sorting
+![AltTasker Main Interface](screenshots/main-interface.png)
+*Real-time process monitoring with color-coded states, memory usage bar, and top 20 processes sorted by memory consumption*
+
+### Process Tree View (Press V)
+![Process Tree View](screenshots/tree-view.png)
+*Hierarchical process tree showing parent-child relationships with tree indicators (└─)*
+
+### Interactive Commands Menu
+![Commands Menu](screenshots/commands-menu.png)
+*Full command reference with sorting options, filtering, navigation, and theme cycling (sorted by PID shown here)*
+
+## �🚀 Quick Start
 
 ### Option A: System-Wide Installation (Recommended)
 
