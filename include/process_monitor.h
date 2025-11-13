@@ -86,4 +86,21 @@ void sort_processes(ProcessInfo processes[], int count, SortMode mode);
 int filter_processes_by_user(const ProcessInfo processes[], int count, 
                               ProcessInfo filtered[], const char* username);
 
+/**
+ * @brief Advanced process filtering with multiple criteria.
+ * 
+ * @param processes Source array of all processes.
+ * @param count Number of processes in source array.
+ * @param filtered Destination array for filtered processes.
+ * @param username Username to filter by (NULL to skip).
+ * @param name_filter Process name substring to match (NULL to skip).
+ * @param state_filter Process state to match (0 to skip: R/S/D/Z/T).
+ * @param mem_threshold_mb Minimum memory in MB (0 to skip).
+ * @return int Number of filtered processes.
+ */
+int filter_processes_advanced(const ProcessInfo processes[], int count,
+                               ProcessInfo filtered[], const char* username,
+                               const char* name_filter, char state_filter,
+                               float mem_threshold_mb);
+
 #endif // PROCESS_MONITOR_H

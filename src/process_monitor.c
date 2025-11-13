@@ -1,4 +1,5 @@
 #include "process_monitor.h"
+#include <stdbool.h>
 
 
 int scan_processes(ProcessInfo processes[], int max_processes, unsigned long total_mem) {
@@ -339,6 +340,67 @@ int filter_processes_by_user(const ProcessInfo processes[], int count,
     int filtered_count = 0;
     for (int i = 0; i < count; i++) {
         if (strcmp(processes[i].user, username) == 0) {
+            filtered[filtered_count++] = processes[i];
+        }
+    }
+    
+    return filtered_count;
+}
+int filter_processes_advanced(const ProcessInfo processes[], int count,
+                               ProcessInfo filtered[], const char* username,
+                               const char* name_filter, char state_filter,
+                               float mem_threshold_mb) {
+    if (!processes || !filtered || count <= 0) return 0;
+    
+    int filtered_count = 0;
+    
+    for (int i = 0; i < count; i++) {
+        bool passes = true;
+        
+        // Filter by username
+        if (username && strlen(username) > 0) {
+            if (strcmp(processes[i].user, username) != 0) {
+                passes = false;
+            }
+        }
+        
+        // Filter by process name (substring match, case-insensitive)
+        if (passes && name_filter && strlen(name_filter) > 0) {
+            char name_lower[MAX_NAME_LEN];
+            char filter_lower[MAX_NAME_LEN];
+            
+            // Convert to lowercase for case-insensitive matching
+            for (size_t j = 0; j < strlen(processes[i].name) && j < MAX_NAME_LEN-1; j++) {
+                name_lower[j] = tolower(processes[i].name[j]);
+            }
+            name_lower[strlen(processes[i].name)] = '\0';
+            
+            for (size_t j = 0; j < strlen(name_filter) && j < MAX_NAME_LEN-1; j++) {
+                filter_lower[j] = tolower(name_filter[j]);
+            }
+            filter_lower[strlen(name_filter)] = '\0';
+            
+            if (strstr(name_lower, filter_lower) == NULL) {
+                passes = false;
+            }
+        }
+        
+        // Filter by state
+        if (passes && state_filter != 0) {
+            if (processes[i].state != state_filter) {
+                passes = false;
+            }
+        }
+        
+        // Filter by memory threshold (in MB)
+        if (passes && mem_threshold_mb > 0) {
+            float mem_mb = (float)processes[i].rss / (1024.0f * 1024.0f);
+            if (mem_mb < mem_threshold_mb) {
+                passes = false;
+            }
+        }
+        
+        if (passes) {
             filtered[filtered_count++] = processes[i];
         }
     }
