@@ -46,4 +46,11 @@ void config_set_defaults(void);
 const char* config_get_path(void);
 void config_apply_theme(ColorTheme theme);
 
+// Dynamic color getters
+const char* config_get_header_color(void);
+const char* config_get_border_color(void);
+const char* config_get_running_color(void);
+const char* config_get_sleeping_color(void);
+const char* config_get_zombie_color(void);
+
 #endif // CONFIG_H

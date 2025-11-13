@@ -183,3 +183,34 @@ void config_save(const char *filename) {
     
     fclose(file);
 }
+
+// Dynamic color getters - return ANSI color codes
+const char* config_get_header_color(void) {
+    static char color[16];
+    snprintf(color, sizeof(color), "\x1b[%dm", global_config.custom_colors.header);
+    return color;
+}
+
+const char* config_get_border_color(void) {
+    static char color[16];
+    snprintf(color, sizeof(color), "\x1b[%dm", global_config.custom_colors.border);
+    return color;
+}
+
+const char* config_get_running_color(void) {
+    static char color[16];
+    snprintf(color, sizeof(color), "\x1b[%dm", global_config.custom_colors.running);
+    return color;
+}
+
+const char* config_get_sleeping_color(void) {
+    static char color[16];
+    snprintf(color, sizeof(color), "\x1b[%dm", global_config.custom_colors.sleeping);
+    return color;
+}
+
+const char* config_get_zombie_color(void) {
+    static char color[16];
+    snprintf(color, sizeof(color), "\x1b[%dm", global_config.custom_colors.zombie);
+    return color;
+}

@@ -168,6 +168,14 @@ int main() {
                     scroll_offset = 0;  // Reset scroll on sort change
                     refresh_counter = REFRESH_INTERVAL;
                     break;
+                case 't':
+                case 'T':
+                    // Cycle through themes
+                    global_config.theme = (global_config.theme + 1) % 5;  // 5 themes total
+                    config_apply_theme(global_config.theme);
+                    config_save(config_path);
+                    refresh_counter = REFRESH_INTERVAL;
+                    break;
                 case 'f':
                 case 'F':
                     printf("\x1b[2J\x1b[H");

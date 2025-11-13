@@ -1,4 +1,5 @@
 #include "display.h"
+#include "config.h"
 
 
 void display_system_info(const sysinfo_t* sysinfo) {
@@ -20,17 +21,17 @@ void display_system_info(const sysinfo_t* sysinfo) {
     
     // Header with system name - Yellow border for visibility
     printf(COLOR_BOLD COLOR_YELLOW "╔══════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
-    printf(COLOR_BOLD COLOR_YELLOW "║" COLOR_RESET COLOR_BOLD COLOR_CYAN "                            AltTasker - System Monitor                        " COLOR_YELLOW "║\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_YELLOW "║" COLOR_RESET COLOR_BOLD "%s                            AltTasker - System Monitor                        " COLOR_YELLOW "║\n" COLOR_RESET, config_get_header_color());
     printf(COLOR_BOLD COLOR_YELLOW "╚══════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
     printf("\n");
     
     // System info in a nice format with icons and colors
-    printf(COLOR_BOLD COLOR_CYAN "  ⏱️  Uptime: " COLOR_RESET "%s" COLOR_BOLD COLOR_CYAN "    |    📊 Processes: " COLOR_RESET COLOR_BOLD "%u\n" COLOR_RESET, 
-           uptime_str, sysinfo->total_processes);
+    printf(COLOR_BOLD "%s  ⏱️  Uptime: " COLOR_RESET "%s" COLOR_BOLD "%s    |    📊 Processes: " COLOR_RESET COLOR_BOLD "%u\n" COLOR_RESET, 
+           config_get_header_color(), uptime_str, config_get_header_color(), sysinfo->total_processes);
     printf("\n");
     
     // Memory bar with color-coded percentage
-    printf(COLOR_BOLD COLOR_CYAN "  💾 Memory Usage: " COLOR_RESET);
+    printf(COLOR_BOLD "%s  💾 Memory Usage: " COLOR_RESET, config_get_header_color());
     printf("%s%.1f%%" COLOR_RESET " [%s / %s]\n", 
            mem_color, sysinfo->mem_usage_percent, used_mem_str, total_mem_str);
     
@@ -53,9 +54,9 @@ void display_processes(const ProcessInfo processes[], int count, int scroll_offs
     if (!processes || count <= 0) return;
 
     // Table header with better formatting and colors
-    printf(COLOR_BOLD COLOR_CYAN "  %-6s %-10s %6s %6s %10s %10s %-5s  %-45s\n" COLOR_RESET,
-           "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "STATE", "COMMAND");
-    printf(COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ─────────────────────────────────────────────\n" COLOR_RESET);
+    printf(COLOR_BOLD "%s  %-6s %-10s %6s %6s %10s %10s %-5s  %-45s\n" COLOR_RESET,
+           config_get_header_color(), "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "STATE", "COMMAND");
+    printf("%s  ────── ────────── ────── ────── ────────── ────────── ─────  ─────────────────────────────────────────────\n" COLOR_RESET, config_get_border_color());
     
     // Show processes with scrolling support
     int start_index = scroll_offset;
@@ -219,9 +220,9 @@ void display_command_menu(SortMode current_sort, const char* filter_user, int sc
     (void)scroll_offset;  // For future use if needed
     
     printf("\n");
-    printf(COLOR_CYAN "  ╔══════════════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
-    printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_BOLD COLOR_YELLOW "Commands" COLOR_RESET COLOR_CYAN "                                                                              ║\n" COLOR_RESET);
-    printf(COLOR_CYAN "  ╠══════════════════════════════════════════════════════════════════════════════════════╣\n" COLOR_RESET);
+    printf("%s  ╔══════════════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET, config_get_border_color());
+    printf("%s  ║ " COLOR_RESET COLOR_BOLD COLOR_YELLOW "Commands" COLOR_RESET "%s                                                                              ║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
+    printf("%s  ╠══════════════════════════════════════════════════════════════════════════════════════╣\n" COLOR_RESET, config_get_border_color());
     
     // Sort options with highlighted current mode
     const char* sort_p = (current_sort == SORT_BY_PID) ? COLOR_GREEN "P" COLOR_RESET : COLOR_BOLD "P" COLOR_RESET;
@@ -239,19 +240,19 @@ void display_command_menu(SortMode current_sort, const char* filter_user, int sc
         default: sort_indicator = COLOR_GREEN "PID↓" COLOR_RESET; break;
     }
     
-    printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Sort:" COLOR_RESET " %sID  %sPU  %semory  %sser" COLOR_CYAN "     Current: %s" COLOR_CYAN "                                ║\n" COLOR_RESET, 
-           sort_p, sort_c, sort_m, sort_u, sort_indicator);
+    printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Sort:" COLOR_RESET " %sID  %sPU  %semory  %sser" "%s     Current: %s" "%s                                ║\n" COLOR_RESET, 
+           config_get_border_color(), sort_p, sort_c, sort_m, sort_u, config_get_border_color(), sort_indicator, config_get_border_color());
     
     // Filter options with color
     if (filter_user && strlen(filter_user) > 0) {
-        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_GREEN "Active: %s" COLOR_RESET COLOR_CYAN "                                                       ║\n" COLOR_RESET, filter_user);
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_GREEN "Active: %s" COLOR_RESET "%s                                                       ║\n" COLOR_RESET, config_get_border_color(), filter_user, config_get_border_color());
     } else {
-        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_BOLD "F" COLOR_RESET " User  " COLOR_BOLD "R" COLOR_RESET " Reset" COLOR_CYAN "                                                       ║\n" COLOR_RESET);
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_BOLD "F" COLOR_RESET " User  " COLOR_BOLD "R" COLOR_RESET " Reset" "%s                                                       ║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
     }
     
     // Navigation with scroll info
     if (total_processes > 20) {
-        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Navigate:" COLOR_RESET " " COLOR_BOLD "↑" COLOR_RESET "/" COLOR_BOLD "↓" COLOR_RESET " Line  " COLOR_BOLD "PgUp" COLOR_RESET "/" COLOR_BOLD "PgDn" COLOR_RESET " Page  " COLOR_BOLD "Home" COLOR_RESET "/" COLOR_BOLD "End" COLOR_RESET " Top/Bottom" COLOR_CYAN "                     ║\n" COLOR_RESET);
+        printf("%s  ║ " COLOR_RESET COLOR_YELLOW "Navigate:" COLOR_RESET " " COLOR_BOLD "↑" COLOR_RESET "/" COLOR_BOLD "↓" COLOR_RESET " Line  " COLOR_BOLD "PgUp" COLOR_RESET "/" COLOR_BOLD "PgDn" COLOR_RESET " Page  " COLOR_BOLD "Home" COLOR_RESET "/" COLOR_BOLD "End" COLOR_RESET " Top/Bottom" "%s                     ║\n" COLOR_RESET, config_get_border_color(), config_get_border_color());
     }
     
     // Actions with color coding
