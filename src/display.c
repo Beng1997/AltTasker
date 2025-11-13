@@ -14,27 +14,27 @@ void display_system_info(const sysinfo_t* sysinfo) {
     format_memory(sysinfo->free_mem, free_mem_str, sizeof(free_mem_str));
     format_uptime(sysinfo->uptime, uptime_str, sizeof(uptime_str));
 
-    // Create colored bars for memory usage
+    // Create colored bars for memory usage with warning colors
     const char* mem_color = (sysinfo->mem_usage_percent < 50.0f) ? COLOR_GREEN :
                             (sysinfo->mem_usage_percent < 75.0f) ? COLOR_YELLOW : COLOR_RED;
     
-    // Header with system name
-    printf(COLOR_BOLD COLOR_CYAN "╔══════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
-    printf(COLOR_BOLD COLOR_CYAN "║" COLOR_RESET COLOR_BOLD "                            AltTasker - System Monitor                        " COLOR_CYAN "║\n" COLOR_RESET);
-    printf(COLOR_BOLD COLOR_CYAN "╚══════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
+    // Header with system name - Yellow border for visibility
+    printf(COLOR_BOLD COLOR_YELLOW "╔══════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_YELLOW "║" COLOR_RESET COLOR_BOLD COLOR_CYAN "                            AltTasker - System Monitor                        " COLOR_YELLOW "║\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_YELLOW "╚══════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
     printf("\n");
     
-    // System info in a nice format
-    printf(COLOR_BOLD "  Uptime: " COLOR_RESET "%s" COLOR_BOLD "    |    " COLOR_RESET "Processes: " COLOR_BOLD "%u\n" COLOR_RESET, 
+    // System info in a nice format with icons and colors
+    printf(COLOR_BOLD COLOR_CYAN "  ⏱️  Uptime: " COLOR_RESET "%s" COLOR_BOLD COLOR_CYAN "    |    📊 Processes: " COLOR_RESET COLOR_BOLD "%u\n" COLOR_RESET, 
            uptime_str, sysinfo->total_processes);
     printf("\n");
     
-    // Memory bar
-    printf(COLOR_BOLD "  Memory Usage: " COLOR_RESET);
+    // Memory bar with color-coded percentage
+    printf(COLOR_BOLD COLOR_CYAN "  💾 Memory Usage: " COLOR_RESET);
     printf("%s%.1f%%" COLOR_RESET " [%s / %s]\n", 
            mem_color, sysinfo->mem_usage_percent, used_mem_str, total_mem_str);
     
-    // Visual memory bar
+    // Visual memory bar with gradient colors
     int bar_width = 60;
     int filled = (int)((sysinfo->mem_usage_percent / 100.0f) * bar_width);
     printf("  [");
@@ -49,7 +49,7 @@ void display_system_info(const sysinfo_t* sysinfo) {
 }
 
 
-void display_processes(const ProcessInfo processes[], int count) {
+void display_processes(const ProcessInfo processes[], int count, int scroll_offset) {
     if (!processes || count <= 0) return;
 
     // Table header with better formatting and colors
@@ -57,51 +57,55 @@ void display_processes(const ProcessInfo processes[], int count) {
            "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "STATE", "COMMAND");
     printf(COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ─────────────────────────────────────────────\n" COLOR_RESET);
     
-    // Show top processes (limit to 25 for readability)
-    int display_count = (count > 25) ? 25 : count;
+    // Show processes with scrolling support (20 visible at a time)
+    const int VISIBLE_PROCESSES = 20;
+    int start_index = scroll_offset;
+    int end_index = (start_index + VISIBLE_PROCESSES > count) ? count : start_index + VISIBLE_PROCESSES;
+    int display_count = end_index - start_index;
     
     for (int i = 0; i < display_count; i++) {
+        int proc_index = start_index + i;
         char vsize_str[16];
         char rss_str[16];
         char cmdline_short[48];
         char user_short[11]; // 10 chars + null terminator
 
-        format_memory(processes[i].vsize, vsize_str, sizeof(vsize_str));
-        format_memory(processes[i].rss, rss_str, sizeof(rss_str));
+        format_memory(processes[proc_index].vsize, vsize_str, sizeof(vsize_str));
+        format_memory(processes[proc_index].rss, rss_str, sizeof(rss_str));
         
         // Truncate username if too long
-        if (strlen(processes[i].user) > 10) {
-            strncpy(user_short, processes[i].user, 9);
+        if (strlen(processes[proc_index].user) > 10) {
+            strncpy(user_short, processes[proc_index].user, 9);
             user_short[9] = '+';
             user_short[10] = '\0';
         } else {
-            strncpy(user_short, processes[i].user, sizeof(user_short));
+            strncpy(user_short, processes[proc_index].user, sizeof(user_short));
         }
         
         // Truncate cmdline if too long
-        size_t cmdline_len = strlen(processes[i].cmdline);
+        size_t cmdline_len = strlen(processes[proc_index].cmdline);
         if (cmdline_len > 44) {
-            strncpy(cmdline_short, processes[i].cmdline, 41);
+            strncpy(cmdline_short, processes[proc_index].cmdline, 41);
             cmdline_short[41] = '.';
             cmdline_short[42] = '.';
             cmdline_short[43] = '.';
             cmdline_short[44] = '\0';
         } else {
-            strncpy(cmdline_short, processes[i].cmdline, sizeof(cmdline_short) - 1);
+            strncpy(cmdline_short, processes[proc_index].cmdline, sizeof(cmdline_short) - 1);
             cmdline_short[sizeof(cmdline_short) - 1] = '\0';
         }
 
         // Color code based on memory usage
         const char* row_color = "";
-        if (processes[i].mem_usage > 5.0f) {
+        if (processes[proc_index].mem_usage > 5.0f) {
             row_color = COLOR_RED;
-        } else if (processes[i].mem_usage > 2.0f) {
+        } else if (processes[proc_index].mem_usage > 2.0f) {
             row_color = COLOR_YELLOW;
         }
         
         // Get state description
         const char* state_desc;
-        switch (processes[i].state) {
+        switch (processes[proc_index].state) {
             case 'R': state_desc = COLOR_GREEN "RUN  " COLOR_RESET; break;
             case 'S': state_desc = "SLEEP"; break;
             case 'D': state_desc = COLOR_YELLOW "DISK " COLOR_RESET; break;
@@ -113,10 +117,10 @@ void display_processes(const ProcessInfo processes[], int count) {
 
         printf("%s  %-6d %-10s %6.1f %6.2f %10s %10s %-5s  %-45s%s\n",
                row_color,
-               processes[i].pid,
+               processes[proc_index].pid,
                user_short,
-               processes[i].cpu_usage,
-               processes[i].mem_usage,
+               processes[proc_index].cpu_usage,
+               processes[proc_index].mem_usage,
                vsize_str,
                rss_str,
                state_desc,
@@ -124,13 +128,24 @@ void display_processes(const ProcessInfo processes[], int count) {
                COLOR_RESET);
     }
     
-    if (count > display_count) {
+    // Show scroll position info
+    if (count > VISIBLE_PROCESSES) {
         printf("\n");
-        printf(COLOR_BOLD "  Showing top %d of %d processes\n" COLOR_RESET, display_count, count);
+        printf(COLOR_BOLD "  Showing %d-%d of %d processes" COLOR_RESET, 
+               start_index + 1, end_index, count);
+        
+        // Add scroll indicators
+        if (scroll_offset > 0) {
+            printf(COLOR_GREEN " ▲ More above" COLOR_RESET);
+        }
+        if (end_index < count) {
+            printf(COLOR_GREEN " ▼ More below" COLOR_RESET);
+        }
+        printf("\n");
+    } else if (count > 0) {
+        printf("\n");
+        printf(COLOR_BOLD "  Showing all %d processes\n" COLOR_RESET, count);
     }
-    
-    printf("\n");
-    printf(COLOR_BOLD "  Press " COLOR_GREEN "Ctrl+C" COLOR_RESET COLOR_BOLD " to exit  |  Refresh: 2s\n" COLOR_RESET);
 }
 
 void format_memory(unsigned long size, char* buffer, size_t buffer_size) {
@@ -199,4 +214,49 @@ const char* get_state_color(char state) {
         case 'I': return COLOR_BLUE;    // Idle - blue
         default:  return "";            // Unknown - default
     }
+}
+
+void display_command_menu(SortMode current_sort, const char* filter_user, int scroll_offset, int total_processes) {
+    (void)scroll_offset;  // For future use if needed
+    
+    printf("\n");
+    printf(COLOR_CYAN "  ╔══════════════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
+    printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_BOLD COLOR_YELLOW "Commands" COLOR_RESET COLOR_CYAN "                                                                              ║\n" COLOR_RESET);
+    printf(COLOR_CYAN "  ╠══════════════════════════════════════════════════════════════════════════════════════╣\n" COLOR_RESET);
+    
+    // Sort options with highlighted current mode
+    const char* sort_p = (current_sort == SORT_BY_PID) ? COLOR_GREEN "P" COLOR_RESET : COLOR_BOLD "P" COLOR_RESET;
+    const char* sort_c = (current_sort == SORT_BY_CPU) ? COLOR_GREEN "C" COLOR_RESET : COLOR_BOLD "C" COLOR_RESET;
+    const char* sort_m = (current_sort == SORT_BY_MEM) ? COLOR_GREEN "M" COLOR_RESET : COLOR_BOLD "M" COLOR_RESET;
+    const char* sort_u = (current_sort == SORT_BY_USER) ? COLOR_GREEN "U" COLOR_RESET : COLOR_BOLD "U" COLOR_RESET;
+    
+    // Current sort indicator
+    const char* sort_indicator;
+    switch (current_sort) {
+        case SORT_BY_CPU: sort_indicator = COLOR_GREEN "CPU↓" COLOR_RESET; break;
+        case SORT_BY_MEM: sort_indicator = COLOR_GREEN "MEM↓" COLOR_RESET; break;
+        case SORT_BY_USER: sort_indicator = COLOR_GREEN "USER↓" COLOR_RESET; break;
+        case SORT_BY_PID: 
+        default: sort_indicator = COLOR_GREEN "PID↓" COLOR_RESET; break;
+    }
+    
+    printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Sort:" COLOR_RESET " %sID  %sPU  %semory  %sser" COLOR_CYAN "     Current: %s" COLOR_CYAN "                                ║\n" COLOR_RESET, 
+           sort_p, sort_c, sort_m, sort_u, sort_indicator);
+    
+    // Filter options with color
+    if (filter_user && strlen(filter_user) > 0) {
+        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_GREEN "Active: %s" COLOR_RESET COLOR_CYAN "                                                       ║\n" COLOR_RESET, filter_user);
+    } else {
+        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Filter:" COLOR_RESET " " COLOR_BOLD "F" COLOR_RESET " User  " COLOR_BOLD "R" COLOR_RESET " Reset" COLOR_CYAN "                                                       ║\n" COLOR_RESET);
+    }
+    
+    // Navigation with scroll info
+    if (total_processes > 20) {
+        printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Navigate:" COLOR_RESET " " COLOR_BOLD "↑" COLOR_RESET "/" COLOR_BOLD "↓" COLOR_RESET " Line  " COLOR_BOLD "PgUp" COLOR_RESET "/" COLOR_BOLD "PgDn" COLOR_RESET " Page  " COLOR_BOLD "Home" COLOR_RESET "/" COLOR_BOLD "End" COLOR_RESET " Top/Bottom" COLOR_CYAN "                     ║\n" COLOR_RESET);
+    }
+    
+    // Actions with color coding
+    printf(COLOR_CYAN "  ║ " COLOR_RESET COLOR_YELLOW "Actions:" COLOR_RESET " " COLOR_RED "K" COLOR_RESET " Kill  " COLOR_CYAN "S" COLOR_RESET " Search  " COLOR_BOLD "Q" COLOR_RESET "/" COLOR_BOLD "Ctrl+C" COLOR_RESET " Quit" COLOR_CYAN "                              ║\n" COLOR_RESET);
+    printf(COLOR_CYAN "  ╚══════════════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
+    printf(COLOR_BOLD "  Auto-refresh: 2s" COLOR_RESET "  |  Press any key above to execute\n");
 }

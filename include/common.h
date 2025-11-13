@@ -17,6 +17,14 @@
 #define BUFFER_SIZE 512
 #define PROC_DIR "/proc/"
 
+// Sorting options
+typedef enum {
+    SORT_BY_PID,
+    SORT_BY_CPU,
+    SORT_BY_MEM,
+    SORT_BY_USER
+} SortMode;
+
 
 // ANSI Color codes
 #define COLOR_RESET   "\x1b[0m"

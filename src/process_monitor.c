@@ -252,3 +252,73 @@ void get_system_info(sysinfo_t *sysinfo) {
         closedir(proc_dir);
     }
 }
+
+// Comparison functions for qsort
+static int compare_by_pid(const void* a, const void* b) {
+    const ProcessInfo* pa = (const ProcessInfo*)a;
+    const ProcessInfo* pb = (const ProcessInfo*)b;
+    return pa->pid - pb->pid;
+}
+
+static int compare_by_cpu(const void* a, const void* b) {
+    const ProcessInfo* pa = (const ProcessInfo*)a;
+    const ProcessInfo* pb = (const ProcessInfo*)b;
+    // Descending order (highest CPU first)
+    if (pb->cpu_usage > pa->cpu_usage) return 1;
+    if (pb->cpu_usage < pa->cpu_usage) return -1;
+    return 0;
+}
+
+static int compare_by_mem(const void* a, const void* b) {
+    const ProcessInfo* pa = (const ProcessInfo*)a;
+    const ProcessInfo* pb = (const ProcessInfo*)b;
+    // Descending order (highest memory first)
+    if (pb->mem_usage > pa->mem_usage) return 1;
+    if (pb->mem_usage < pa->mem_usage) return -1;
+    return 0;
+}
+
+static int compare_by_user(const void* a, const void* b) {
+    const ProcessInfo* pa = (const ProcessInfo*)a;
+    const ProcessInfo* pb = (const ProcessInfo*)b;
+    return strcmp(pa->user, pb->user);
+}
+
+void sort_processes(ProcessInfo processes[], int count, SortMode mode) {
+    if (!processes || count <= 0) return;
+    
+    switch (mode) {
+        case SORT_BY_PID:
+            qsort(processes, count, sizeof(ProcessInfo), compare_by_pid);
+            break;
+        case SORT_BY_CPU:
+            qsort(processes, count, sizeof(ProcessInfo), compare_by_cpu);
+            break;
+        case SORT_BY_MEM:
+            qsort(processes, count, sizeof(ProcessInfo), compare_by_mem);
+            break;
+        case SORT_BY_USER:
+            qsort(processes, count, sizeof(ProcessInfo), compare_by_user);
+            break;
+    }
+}
+
+int filter_processes_by_user(const ProcessInfo processes[], int count, 
+                              ProcessInfo filtered[], const char* username) {
+    if (!processes || !filtered || count <= 0) return 0;
+    
+    // If no username provided, copy all processes
+    if (!username || strlen(username) == 0) {
+        memcpy(filtered, processes, count * sizeof(ProcessInfo));
+        return count;
+    }
+    
+    int filtered_count = 0;
+    for (int i = 0; i < count; i++) {
+        if (strcmp(processes[i].user, username) == 0) {
+            filtered[filtered_count++] = processes[i];
+        }
+    }
+    
+    return filtered_count;
+}

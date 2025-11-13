@@ -10,12 +10,13 @@
  */
 void display_system_info(const sysinfo_t* sysinfo);
 /**
- * @brief Displays the list of processes in a formatted table.
+ * @brief Displays the list of processes in a formatted table with scrolling.
  * 
  * @param processes Array of ProcessInfo structures containing process information.
  * @param count Number of processes in the array.
+ * @param scroll_offset Current scroll position (0-based index).
  */
-void display_processes(const ProcessInfo processes[], int count);
+void display_processes(const ProcessInfo processes[], int count, int scroll_offset);
 
 
 /**
@@ -57,5 +58,15 @@ void format_uptime(unsigned long seconds, char* buffer, size_t buffer_size);
  * @return const char* ANSI color code string.
  */
 const char* get_state_color(char state);
+
+/**
+ * @brief Displays the command menu at the bottom of the screen.
+ * 
+ * @param current_sort Current sorting mode being used.
+ * @param filter_user Current user filter (NULL if no filter).
+ * @param scroll_offset Current scroll position for navigation info.
+ * @param total_processes Total number of processes for scroll indicators.
+ */
+void display_command_menu(SortMode current_sort, const char* filter_user, int scroll_offset, int total_processes);
 
 #endif // DISPLAY_H

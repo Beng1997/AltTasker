@@ -8,8 +8,8 @@ A lightweight, `htop`-style Linux task monitor written in C. Monitor your system
 - 🎨 Colorful terminal UI with progress bars
 - 💾 Memory usage visualization  
 - ⚡ Fast and efficient C implementation
-- 🔄 Auto-refresh every 2 seconds
-- 🎯 Shows top 25 processes by memory usage
+- 🔄 Interactive CLI with sorting and filtering
+- 🎯 Shows top 20 processes by memory usage
 
 ## 🚀 Quick Start (3 Simple Steps!)
 

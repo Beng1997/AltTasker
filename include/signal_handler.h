@@ -10,7 +10,7 @@
  * This function registers handlers for SIGINT and SIGTERM to ensure graceful shutdown.
  * It should be called once at the beginning of main().
  */
-void setup_signal_handlers(void);
+void setup_signal_handler(void);
 
 /**
  * @brief Handler function for termination signals (SIGINT, SIGTERM).

@@ -65,4 +65,25 @@ int get_cmdline(pid_t pid, char *buffer, size_t size);
  */
 void get_system_info(sysinfo_t *sysinfo);
 
+/**
+ * @brief Sorts the processes array according to the specified sort mode.
+ * 
+ * @param processes Array of process information to sort.
+ * @param count Number of processes in the array.
+ * @param mode Sorting mode (SORT_BY_PID, SORT_BY_CPU, SORT_BY_MEM, SORT_BY_USER).
+ */
+void sort_processes(ProcessInfo processes[], int count, SortMode mode);
+
+/**
+ * @brief Filters processes by username.
+ * 
+ * @param processes Source array of all processes.
+ * @param count Number of processes in source array.
+ * @param filtered Destination array for filtered processes.
+ * @param username Username to filter by (NULL for no filter).
+ * @return int Number of filtered processes.
+ */
+int filter_processes_by_user(const ProcessInfo processes[], int count, 
+                              ProcessInfo filtered[], const char* username);
+
 #endif // PROCESS_MONITOR_H
