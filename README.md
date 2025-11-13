@@ -1,6 +1,8 @@
 # AltTasker
 
-A lightweight, `htop`-style Linux task monitor written in C. Monitor your system processes with a beautiful, colorful terminal interface.
+A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your system processes with a beautiful, colorful terminal interface.
+
+**Platform Support:** Native Linux systems (Ubuntu, Debian, Fedora, Arch, etc.) and WSL (Windows Subsystem for Linux).
 
 ## ✨ Features
 
@@ -45,8 +47,10 @@ task
 The installer will:
 - ✅ Build the project automatically
 - ✅ Install to `/usr/local/bin/task`
-- ✅ Set up Ctrl+Alt+Delete hotkey (optional)
+- ✅ Set up Ctrl+Alt+Delete hotkey (optional, systemd required)
 - ✅ Create systemd service for hotkey integration
+
+**Works on:** Any Linux distribution with systemd (Ubuntu, Debian, Fedora, Arch, etc.) and WSL2
 
 **Advanced Installation Options:**
 ```bash
@@ -131,20 +135,20 @@ AltTasker/
 
 ---
 
-## ⚠️ IMPORTANT: Terminal Requirements
+## ⚙️ System Requirements
 
-**✅ DO:**
-- Run from **WSL terminal** (native Linux terminal)
-- Use Windows Terminal with WSL profile
-- Run `wsl` command first, then `task`
+### Linux (Native or WSL)
+- **OS**: Any Linux distribution (Ubuntu, Debian, Fedora, Arch, RHEL, etc.) or WSL2
+- **Kernel**: Linux kernel with `/proc` filesystem support
+- **Build Tools**: gcc, make
+- **Optional**: systemd (for Ctrl+Alt+Delete hotkey integration)
 
-**❌ DON'T:**
-- Run from PowerShell (causes scrolling issues)
-- Run from CMD
-- Use `RUN-IN-WSL.bat` (deprecated)
-
-### Why?
-PowerShell doesn't properly support ANSI escape codes and terminal control sequences. This causes the display to scroll instead of refresh in place.
+### Terminal Requirements
+AltTasker requires a terminal emulator that supports ANSI escape sequences:
+- ✅ **Linux native terminals** (GNOME Terminal, Konsole, xterm, etc.)
+- ✅ **WSL2** with Windows Terminal or native WSL terminal
+- ✅ **SSH sessions** to Linux servers
+- ❌ **PowerShell/CMD** (limited ANSI support, use WSL instead on Windows)
 
 ---
 
@@ -242,11 +246,11 @@ sudo ./scripts/uninstall.sh  # Complete removal
 ## 📚 Additional Documentation
 
 - **[USAGE.md](USAGE.md)** - Detailed command reference and usage examples
-- **[SETUP.md](SETUP.md)** - Detailed setup guide for different environments
+- **[SETUP.md](SETUP.md)** - Setup guide for different Linux environments
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick reference card
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
 - **[FEATURES-v2.2.md](FEATURES-v2.2.md)** - Latest features (scrolling navigation)
-- **[docs/RUNNING-IN-WSL-QEMU.md](docs/RUNNING-IN-WSL-QEMU.md)** - Advanced topics
+- **[docs/RUNNING-IN-WSL-QEMU.md](docs/RUNNING-IN-WSL-QEMU.md)** - WSL and QEMU setup (for Windows users)
 - **[docs/INTERACTIVE-COMMANDS.md](docs/INTERACTIVE-COMMANDS.md)** - Complete command reference
 
 ---
@@ -267,12 +271,24 @@ sudo ./scripts/install.sh
 #### "gcc: command not found" or build errors
 ```bash
 # Install build tools
+
+# Debian/Ubuntu/WSL
 sudo apt update
 sudo apt install build-essential
+
+# Fedora/RHEL/CentOS
+sudo dnf install gcc make
+
+# Arch Linux
+sudo pacman -S base-devel
 ```
 
 #### "systemd not found" warning
-This is normal if you're on WSL1 or a system without systemd. The installer will skip Ctrl+Alt+Delete setup but the main application will work fine.
+This is normal if you're on:
+- WSL1 (upgrade to WSL2 for systemd support)
+- Systems without systemd (Alpine Linux, older distributions, containers)
+
+The installer will skip Ctrl+Alt+Delete setup, but the main application will work perfectly. You can still run AltTasker manually with the `task` command.
 
 ### Runtime Issues
 
@@ -295,7 +311,7 @@ task
 
 #### Ctrl+Alt+Delete hotkey not working
 ```bash
-# Verify service is enabled
+# Verify service is enabled (requires systemd)
 sudo systemctl status alttasker-hotkey.service
 
 # Check systemd override
@@ -306,13 +322,30 @@ sudo systemctl daemon-reload
 sudo systemctl enable alttasker-hotkey.service
 ```
 
+**Note:** Ctrl+Alt+Delete integration only works on:
+- Native Linux systems with systemd
+- Console/TTY mode (not in GUI desktop sessions)
+- WSL2 with systemd enabled (requires configuration)
+
 #### Navigation keys not working
 Make sure you're in a proper terminal emulator that supports ANSI escape sequences:
-- ✅ WSL Terminal
-- ✅ Windows Terminal
-- ✅ Linux native terminals
-- ❌ PowerShell (limited support)
+- ✅ Linux native terminals (GNOME Terminal, Konsole, xterm, Alacritty, etc.)
+- ✅ WSL2 with Windows Terminal
+- ✅ SSH sessions to Linux servers
+- ❌ PowerShell (limited support - use WSL on Windows)
 - ❌ CMD (no support)
+
+#### Running on Windows
+AltTasker is a **Linux application**. On Windows, you must use WSL (Windows Subsystem for Linux):
+```bash
+# Install WSL if not already installed (PowerShell as Administrator)
+wsl --install
+
+# Then run in WSL
+wsl
+cd /path/to/AltTasker
+sudo ./scripts/install.sh
+```
 
 ### Uninstallation Issues
 
@@ -344,6 +377,8 @@ Contributions welcome! Please feel free to submit issues or pull requests.
 ---
 
 **Made with ❤️ for Linux system monitoring**
+
+*AltTasker is designed for Linux systems. Windows users can run it via WSL (Windows Subsystem for Linux).*
 
 ## 📋 File Descriptions
 
