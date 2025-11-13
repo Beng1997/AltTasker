@@ -115,32 +115,18 @@ AltTasker/
 │   └── 📄 common.h                # General definitions, macros, constants
 │
 ├── 📁 scripts/                     # *** Bash Scripts ***
-│   ├── 📄 install.sh              # Compilation + installation + systemd modification
-│   ├── 📄 uninstall.sh            # Removal + restore defaults
-│   └── 📄 test_vm.sh              # Run tests in QEMU (optional)
+│   ├── 📄 install.sh              # Professional installation with systemd integration
+│   └── 📄 uninstall.sh            # Complete removal and system restoration
 │
 ├── 📁 tests/                       # *** Tests ***
-│   ├── 📄 test_basic.sh           # Basic functional tests
-│   ├── 📄 test_parser.c           # Test /proc parsing
-│   └── 📁 mock_proc/              # /proc simulation for testing
-│       ├── 📁 1/                  # Mock process PID=1
-│       │   ├── stat
-│       │   ├── status
-│       │   └── cmdline
-│       └── 📁 1234/               # Mock process PID=1234
-│           ├── stat
-│           ├── status
-│           └── cmdline
+│   ├── 📄 test_features.py        # Automated feature testing (18 tests)
+│   ├── 📄 test_performance.py     # Performance benchmarks
+│   ├── � test_basic.sh           # Basic shell tests
+│   └── � README.md               # Testing documentation
 │
 ├── 📁 docs/                        # *** Detailed Documentation ***
-│   ├── 📄 ARCHITECTURE.md         # Architecture, design decisions
-│   ├── 📄 INSTALL.md              # Step-by-step installation instructions
-│   ├── 📄 TESTING.md              # How to run tests
-│   └── 📄 CONTRIBUTING.md         # Contributor guidelines (optional)
-│
-└── 📁 examples/                    # *** Usage Examples (optional) ***
-    ├── 📄 config.example          # Example configuration file
-    └── 📄 screenshot.png          # Screenshot of the software in action
+│   ├── 📄 RUNNING-IN-WSL-QEMU.md  # WSL and QEMU setup guide
+│   └── 📄 INTERACTIVE-COMMANDS.md # Complete interactive command reference
 ```
 
 ---
@@ -260,10 +246,8 @@ sudo ./scripts/uninstall.sh  # Complete removal
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick reference card
 - **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
 - **[FEATURES-v2.2.md](FEATURES-v2.2.md)** - Latest features (scrolling navigation)
-- **[docs/INSTALL.md](docs/INSTALL.md)** - Advanced installation scenarios
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture
-- **[docs/TESTING.md](docs/TESTING.md)** - Testing procedures
 - **[docs/RUNNING-IN-WSL-QEMU.md](docs/RUNNING-IN-WSL-QEMU.md)** - Advanced topics
+- **[docs/INTERACTIVE-COMMANDS.md](docs/INTERACTIVE-COMMANDS.md)** - Complete command reference
 
 ---
 
@@ -378,19 +362,13 @@ Contributions welcome! Please feel free to submit issues or pull requests.
 ### Scripts (`scripts/`)
 - **install.sh** - Professional installation script with systemd integration, Ctrl+Alt+Delete hotkey setup, and automated build
 - **uninstall.sh** - Complete removal script that restores system defaults and cleans up all installed components
-- **test_vm.sh** - Optional script to run tests in a QEMU virtual machine for safe testing
 
 ### Tests (`tests/`)
+- **test_features.py** - Comprehensive Python test suite with 18 automated tests covering all features
+- **test_performance.py** - Performance benchmarking script for system monitoring overhead
 - **test_basic.sh** - Shell script for basic functional testing
-- **test_parser.c** - Unit tests for `/proc` parsing logic
-- **mock_proc/** - Simulated `/proc` directory structure for isolated testing without system access
+- **README.md** - Testing documentation and guidelines
 
 ### Documentation (`docs/`)
-- **ARCHITECTURE.md** - Technical architecture overview and design rationale
-- **INSTALL.md** - Comprehensive installation guide with troubleshooting
-- **TESTING.md** - Testing procedures and test suite documentation
-- **CONTRIBUTING.md** - Guidelines for contributors (coding standards, PR process)
-
-### Examples (`examples/`)
-- **config.example** - Sample configuration file demonstrating available options
-- **screenshot.png** - Visual example of AltTasker in action
+- **RUNNING-IN-WSL-QEMU.md** - Guide for running in WSL and QEMU environments
+- **INTERACTIVE-COMMANDS.md** - Complete reference for all interactive commands and keyboard shortcuts
