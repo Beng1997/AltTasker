@@ -4,38 +4,91 @@ A lightweight, `htop`-style Linux task monitor written in C. Monitor your system
 
 ## ✨ Features
 
-- 📊 Real-time process monitoring
-- 🎨 Colorful terminal UI with progress bars
-- 💾 Memory usage visualization  
-- ⚡ Fast and efficient C implementation
-- 🔄 Interactive CLI with sorting and filtering
-- 🎯 Shows top 20 processes by memory usage
+### Core Functionality
+- 📊 **Real-time process monitoring** - Live system process information
+- 🎨 **Colorful terminal UI** - Beautiful ANSI colors with progress bars
+- 💾 **Memory usage visualization** - Visual bars showing memory consumption
+- ⚡ **Fast and efficient** - Lightweight C implementation with minimal overhead
+- 🎯 **Top processes view** - Shows top 20 processes by memory usage
 
-## 🚀 Quick Start (3 Simple Steps!)
+### Interactive Commands (v2.2)
+- 🔄 **Sorting** - Sort by PID (P), CPU (C), Memory (M), User (U)
+- 🔍 **Filtering** - Filter by username (F), reset filters (R)
+- 🎮 **Process Control** - Kill processes (K), search (S)
+- 📜 **Scrolling** - Navigate with Arrow keys, Page Up/Down, Home/End
+- ⌨️ **Hotkey Integration** - Optional Ctrl+Alt+Delete support (systemd)
 
-### 1. Open WSL Terminal (Important!)
+### Display Features
+- ✨ **Visual indicators** - ▲ More above / ▼ More below
+- 📍 **Position tracking** - "Showing X-Y of Z processes"
+- 🎨 **Color coding** - Green (running), Yellow (disk wait), Red (zombie)
+- 📊 **System overview** - Uptime, process count, memory usage bar
+
+## 🚀 Quick Start
+
+### Option A: System-Wide Installation (Recommended)
+
+Install AltTasker system-wide with optional Ctrl+Alt+Delete hotkey integration:
+
 ```bash
-# Open WSL - NOT PowerShell!
-wsl
-```
+# Clone the repository
+git clone https://github.com/Beng1997/AltTasker.git
+cd AltTasker
 
-### 2. Compile the Project
-```bash
-cd /mnt/d/AltTasker
-make
-```
-
-### 3. Install and Run
-```bash
-# Install the 'task' command
-./scripts/install-alias.sh
-source ~/.bashrc
+# Run the installer (requires sudo)
+sudo ./scripts/install.sh
 
 # Run it!
 task
 ```
 
-**That's it!** Press Ctrl+C to exit.
+The installer will:
+- ✅ Build the project automatically
+- ✅ Install to `/usr/local/bin/task`
+- ✅ Set up Ctrl+Alt+Delete hotkey (optional)
+- ✅ Create systemd service for hotkey integration
+
+**Advanced Installation Options:**
+```bash
+# Skip Ctrl+Alt+Delete setup
+sudo ./scripts/install.sh --no-hotkey
+
+# Non-interactive mode (for automation)
+sudo ./scripts/install.sh --unattended
+
+# Show help
+./scripts/install.sh --help
+```
+
+### Option B: Manual Build (Development)
+
+For development or testing without system installation:
+
+```bash
+# Compile the project
+make
+
+# Run directly
+./alttasker
+
+# Or create local alias
+alias task='./alttasker'
+```
+
+### Uninstallation
+
+Remove AltTasker completely:
+
+```bash
+# Standard uninstallation
+sudo ./scripts/uninstall.sh
+
+# Keep backup files
+sudo ./scripts/uninstall.sh --keep-backups
+
+# Non-interactive mode
+sudo ./scripts/uninstall.sh --unattended
+```
 
 ---
 
@@ -111,71 +164,185 @@ PowerShell doesn't properly support ANSI escape codes and terminal control seque
 
 ## 🎨 Usage
 
+### Running AltTasker
+
 ```bash
-# Start monitoring
+# If installed system-wide
 task
 
-# Exit
-Ctrl+C
+# Or run directly from build directory
+./alttasker
+
+# Exit anytime
+Ctrl+C or Q
 ```
+
+### Interactive Commands
+
+Once running, use these keyboard shortcuts:
+
+#### Sorting
+- `P` - Sort by PID (Process ID)
+- `C` - Sort by CPU usage
+- `M` - Sort by Memory usage (default)
+- `U` - Sort by User/Owner
+
+#### Navigation (v2.2)
+- `↑` / `↓` - Scroll up/down one line
+- `Page Up` / `Page Down` - Scroll one page (20 lines)
+- `Home` - Jump to top of list
+- `End` - Jump to bottom of list
+
+#### Filtering & Actions
+- `F` - Filter processes by username
+- `R` - Reset all filters
+- `K` - Kill selected process (requires sudo)
+- `S` - Search for process by name
+- `Q` - Quit application
 
 ### What You'll See
 
-- 🟢 **System Info**: Uptime, total processes, memory usage with visual bar
-- 📋 **Process Table**: Top 25 processes sorted by memory
-- 🎨 **Color Coding**:
-  - Green: Running processes / Low usage
-  - Yellow: Disk wait / Medium usage (2-5%)
-  - Red: Zombie processes / High usage (>5%)
-  - Cyan: Headers and borders
+```
+╔════════════════════════════════════════════════════════════════╗
+║                    ALTTASKER - Process Monitor                 ║
+╠════════════════════════════════════════════════════════════════╣
+║  Uptime: 5d 12h 34m  |  Processes: 347  |  Memory: 65.2%      ║
+║  [████████████████░░░░░░░░░░] 12.4 / 19.0 GB                  ║
+╠════════════════════════════════════════════════════════════════╣
+║  PID    USER      CPU%   MEM%    VSZ      RSS    STATE  CMD   ║
+╠════════════════════════════════════════════════════════════════╣
+║  1234   root      12.5   15.2    2.4G     1.2G   R      chrome║
+║  5678   user      5.3    8.1     1.8G     890M   S      code  ║
+║  ...                                                            ║
+╠════════════════════════════════════════════════════════════════╣
+║  ▼ More below - Showing 1-20 of 347 processes                 ║
+╠════════════════════════════════════════════════════════════════╣
+║  Sort: P(ID) C(PU) M(em) U(ser) | Filter: F R | Kill: K       ║
+║  Navigation: ↑/↓ Line  PgUp/PgDn Page  Home/End Top/Bottom   ║
+╚════════════════════════════════════════════════════════════════╝
+```
+
+### Color Coding
+- 🟢 **Green** - Running processes (R) / Low usage (<2%)
+- 🟡 **Yellow** - Disk wait (D) / Medium usage (2-5%)
+- 🔴 **Red** - Zombie processes (Z) / High usage (>5%)
+- 🔵 **Cyan** - Headers, borders, and system info
 
 ---
 
 ## 🛠️ Build Commands
 
 ```bash
+# Standard build
 make          # Compile the project
+
+# Development
 make clean    # Clean build artifacts
 make rebuild  # Clean + compile
 make run      # Compile and run directly
-make install  # Install to /usr/local/bin (requires sudo)
+
+# System installation (use scripts instead)
+# sudo make install  # Deprecated - use ./scripts/install.sh
+```
+
+**Recommended:** Use the installation scripts for system-wide setup:
+```bash
+sudo ./scripts/install.sh    # Full installation with optional hotkey
+sudo ./scripts/uninstall.sh  # Complete removal
 ```
 
 ---
 
 ## 📚 Additional Documentation
 
-- **[SETUP.md](SETUP.md)** - Detailed setup guide
-- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference
+- **[USAGE.md](USAGE.md)** - Detailed command reference and usage examples
+- **[SETUP.md](SETUP.md)** - Detailed setup guide for different environments
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference card
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and changes
+- **[FEATURES-v2.2.md](FEATURES-v2.2.md)** - Latest features (scrolling navigation)
+- **[docs/INSTALL.md](docs/INSTALL.md)** - Advanced installation scenarios
+- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Technical architecture
+- **[docs/TESTING.md](docs/TESTING.md)** - Testing procedures
 - **[docs/RUNNING-IN-WSL-QEMU.md](docs/RUNNING-IN-WSL-QEMU.md)** - Advanced topics
 
 ---
 
 ## 🐛 Troubleshooting
 
-### "task: command not found"
+### Installation Issues
+
+#### "Permission denied" during installation
 ```bash
-source ~/.bashrc
-# Or close and reopen your terminal
+# Make sure scripts are executable
+chmod +x scripts/install.sh scripts/uninstall.sh
+
+# Run with sudo
+sudo ./scripts/install.sh
 ```
 
-### Screen is scrolling instead of refreshing
+#### "gcc: command not found" or build errors
+```bash
+# Install build tools
+sudo apt update
+sudo apt install build-essential
+```
+
+#### "systemd not found" warning
+This is normal if you're on WSL1 or a system without systemd. The installer will skip Ctrl+Alt+Delete setup but the main application will work fine.
+
+### Runtime Issues
+
+#### "task: command not found" after installation
+```bash
+# Check if binary is installed
+which task
+ls -la /usr/local/bin/task
+
+# If missing, reinstall
+sudo ./scripts/install.sh
+```
+
+#### Screen is scrolling instead of refreshing
 You're running from PowerShell! Switch to WSL terminal:
 ```bash
 wsl
 task
 ```
 
-### Permission denied
+#### Ctrl+Alt+Delete hotkey not working
 ```bash
-chmod +x /mnt/d/AltTasker/alttasker
+# Verify service is enabled
+sudo systemctl status alttasker-hotkey.service
+
+# Check systemd override
+ls -la /etc/systemd/system/ctrl-alt-del.target.d/
+
+# Re-enable if needed
+sudo systemctl daemon-reload
+sudo systemctl enable alttasker-hotkey.service
 ```
 
-### Compile errors
+#### Navigation keys not working
+Make sure you're in a proper terminal emulator that supports ANSI escape sequences:
+- ✅ WSL Terminal
+- ✅ Windows Terminal
+- ✅ Linux native terminals
+- ❌ PowerShell (limited support)
+- ❌ CMD (no support)
+
+### Uninstallation Issues
+
+#### Can't remove AltTasker
 ```bash
-# Make sure you have build tools
-sudo apt update
-sudo apt install build-essential
+# Force uninstallation (will attempt cleanup)
+sudo ./scripts/uninstall.sh --unattended
+
+# Manual cleanup if needed
+sudo rm -f /usr/local/bin/task
+sudo systemctl disable alttasker-hotkey.service
+sudo rm -f /etc/systemd/system/alttasker-hotkey.service
+sudo rm -rf /etc/systemd/system/ctrl-alt-del.target.d/
+sudo systemctl daemon-reload
 ```
 
 ---
@@ -209,8 +376,8 @@ Contributions welcome! Please feel free to submit issues or pull requests.
 - **common.h** - Shared constants, macros, and type definitions used across the project
 
 ### Scripts (`scripts/`)
-- **install.sh** - Automates compilation, binary installation, and systemd configuration
-- **uninstall.sh** - Removes the application and restores original system settings
+- **install.sh** - Professional installation script with systemd integration, Ctrl+Alt+Delete hotkey setup, and automated build
+- **uninstall.sh** - Complete removal script that restores system defaults and cleans up all installed components
 - **test_vm.sh** - Optional script to run tests in a QEMU virtual machine for safe testing
 
 ### Tests (`tests/`)

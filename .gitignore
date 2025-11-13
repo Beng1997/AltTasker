@@ -53,3 +53,16 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# Build artifacts
+build/
+alttasker
+
+# Test artifacts
+*.log
+*.tmp
+
+# Python test scripts (local testing only)
+tests/test_*.py
+tests/__pycache__/
+tests/*.pyc
