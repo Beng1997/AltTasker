@@ -1,0 +1,9 @@
+# Python requirements for AltTasker testing
+# Install with: pip install -r tests/requirements.txt
+
+# Performance testing
+psutil>=5.9.0
+
+# Optional: Code quality tools
+# pylint>=2.15.0
+# black>=22.0.0

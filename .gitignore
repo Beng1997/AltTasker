@@ -66,3 +66,5 @@ alttasker
 tests/test_*.py
 tests/__pycache__/
 tests/*.pyc
+# But keep requirements.txt tracked
+!tests/requirements.txt
