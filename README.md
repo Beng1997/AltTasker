@@ -27,7 +27,7 @@ A lightweight, `htop`-style **Linux task monitor** written in C with **custom th
 ![AltTasker Main Interface](screenshots/main-interface.png)
 *Real-time process monitoring with color-coded states, memory usage bar, and top 20 processes sorted by memory consumption*
 
-### Process Tree View (Press V)
+### Memory Usage Bar
 ![Process Tree View](screenshots/tree-view.png)
 *Hierarchical process tree showing parent-child relationships with tree indicators (└─)*
 
