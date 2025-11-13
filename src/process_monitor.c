@@ -77,12 +77,35 @@ int get_process_info(pid_t pid, ProcessInfo *pinfo, unsigned long total_mem) {
     // Convert RSS from pages to bytes (typically 4096 bytes per page)
     pinfo->rss = rss_pages * sysconf(_SC_PAGESIZE);
     
-    // Calculate CPU usage (simplified - actual calculation requires tracking over time)
-    // For now, store total CPU time in jiffies
-    pinfo->cpu_usage = (float)(utime + stime) / sysconf(_SC_CLK_TCK);
+    // Store CPU time for later tracking/calculation
+    pinfo->utime = utime;
+    pinfo->stime = stime;
     
-    // Store start time
+    // Store start time (in seconds since boot)
     pinfo->starttime = starttime / sysconf(_SC_CLK_TCK);
+    
+    // Calculate CPU % based on process lifetime
+    // Get system uptime
+    FILE *uptime_fp = fopen("/proc/uptime", "r");
+    float system_uptime = 0;
+    if (uptime_fp) {
+        if (fscanf(uptime_fp, "%f", &system_uptime) != 1) {
+            system_uptime = 0;
+        }
+        fclose(uptime_fp);
+    }
+    
+    // Calculate process uptime
+    float process_uptime = system_uptime - pinfo->starttime;
+    if (process_uptime > 0) {
+        // CPU usage = (total CPU time / process uptime) * 100
+        float total_cpu_seconds = (float)(utime + stime) / sysconf(_SC_CLK_TCK);
+        pinfo->cpu_usage = (total_cpu_seconds / process_uptime) * 100.0f;
+        // Cap at reasonable value (can exceed 100% on multi-core)
+        if (pinfo->cpu_usage > 999.9f) pinfo->cpu_usage = 999.9f;
+    } else {
+        pinfo->cpu_usage = 0.0f;
+    }
     
     // ========================================================================
     // 2. Read from /proc/[pid]/status - contains UID and other details

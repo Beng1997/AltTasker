@@ -48,6 +48,8 @@ typedef struct {
     time_t starttime;
     float cpu_usage;
     float mem_usage;
+    unsigned long utime;  // CPU time in user mode (for tracking)
+    unsigned long stime;  // CPU time in kernel mode (for tracking)
 } ProcessInfo; // Process information structure
 
 typedef struct {
