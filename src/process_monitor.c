@@ -2,14 +2,21 @@
 
 
 int scan_processes(ProcessInfo processes[], int max_processes) {
-     // open /proc directory
+    // Validate input parameters
+    if (!processes || max_processes <= 0) {
+        return -1;
+    }
+    
+    // Open /proc directory
     DIR *proc_dir = opendir(PROC_DIR);
     if (!proc_dir) {
         perror("opendir /proc");
         return -1;
     }
+    
     struct dirent *entry; 
     int count = 0;
+    
     while ((entry = readdir(proc_dir)) != NULL && count < max_processes) {
         if (is_pid(entry->d_name)) {
             pid_t pid = (pid_t)atoi(entry->d_name);
@@ -18,8 +25,9 @@ int scan_processes(ProcessInfo processes[], int max_processes) {
             }
         }
     }
+    
     closedir(proc_dir);
-    return 0;
+    return count;  // Return number of processes scanned, not 0!
 }
 
 
@@ -159,7 +167,7 @@ int get_process_info(pid_t pid, ProcessInfo *pinfo) {
 }
 
 int is_pid(const char* str) {
-    if (!str) return 0;
+    if (!str || *str == '\0') return 0;  // Check for NULL or empty string
     for (int i = 0; str[i] != '\0'; i++) {
         if (!isdigit(str[i])) {
             return 0;
@@ -179,19 +187,51 @@ int get_uid(const char* username, uid_t* uid) {
     return 0;
 }
 
-int get_cmdline(pid_t pid) {
+int get_cmdline(pid_t pid, char *buffer, size_t size) {
+    // Validate input parameters
+    if (!buffer || size == 0) {
+        return -1;
+    }
+    
+    // Build path to /proc/[pid]/cmdline
     char path[BUFFER_SIZE];
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
+    
+    // Open cmdline file
     FILE *fp = fopen(path, "r");
     if (!fp) {
-        return -1; // Could not open cmdline
+        return -1; // Could not open cmdline (process may have terminated or no permission)
     }
-    char buffer[MAX_CMDLINE_LEN];
-    size_t bytes_read = fread(buffer, 1, MAX_CMDLINE_LEN - 1, fp);
+    
+    // Read cmdline into buffer
+    size_t bytes_read = fread(buffer, 1, size - 1, fp);
     fclose(fp);
-    if (bytes_read > 0) {
-        // Process cmdline as needed
+    
+    // Handle empty cmdline (kernel threads)
+    if (bytes_read == 0) {
+        buffer[0] = '\0';
         return 0;
-    }       
-    return -1;
+    }
+    
+    // ========================================================================
+    // Process the cmdline: replace null bytes with spaces
+    // ========================================================================
+    // The cmdline file contains arguments separated by null bytes:
+    // Example: "/usr/bin/vim\0project.c\0" -> "/usr/bin/vim project.c"
+    
+    for (size_t i = 0; i < bytes_read - 1; i++) {
+        if (buffer[i] == '\0') {
+            buffer[i] = ' ';  // Replace null with space
+        }
+    }
+    
+    // Ensure the string is null-terminated
+    buffer[bytes_read] = '\0';
+    
+    // Remove trailing spaces (if any)
+    while (bytes_read > 0 && buffer[bytes_read - 1] == ' ') {
+        buffer[--bytes_read] = '\0';
+    }
+    
+    return (int)bytes_read;  // Return number of bytes written
 }

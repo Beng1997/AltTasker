@@ -44,9 +44,15 @@ int get_uid(const char* username, uid_t* uid);
 /** 
  * @brief Retrieves the command line of a process given its PID.
  * 
+ * This function reads the command line arguments from /proc/[pid]/cmdline
+ * and formats them into a single string with spaces between arguments.
+ * 
  * @param pid The process ID.
- * @return int Returns 0 on success, or a negative value on failure.
+ * @param buffer Pointer to a buffer where the command line will be stored.
+ * @param size Size of the buffer.
+ * @return int Returns the number of bytes written on success, 0 if cmdline is empty, 
+ *         or a negative value on failure.
  */
-int get_cmdline(pid_t pid);
+int get_cmdline(pid_t pid, char *buffer, size_t size);
 
 #endif // PROCESS_MONITOR_H
