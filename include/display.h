@@ -16,7 +16,7 @@ void display_system_info(const sysinfo_t* sysinfo);
  * @param count Number of processes in the array.
  * @param scroll_offset Current scroll position (0-based index).
  */
-void display_processes(const ProcessInfo processes[], int count, int scroll_offset);
+void display_processes(const ProcessInfo processes[], int count, int scroll_offset, int visible_processes);
 
 
 /**

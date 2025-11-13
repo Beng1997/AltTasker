@@ -49,7 +49,7 @@ void display_system_info(const sysinfo_t* sysinfo) {
 }
 
 
-void display_processes(const ProcessInfo processes[], int count, int scroll_offset) {
+void display_processes(const ProcessInfo processes[], int count, int scroll_offset, int visible_processes) {
     if (!processes || count <= 0) return;
 
     // Table header with better formatting and colors
@@ -57,10 +57,9 @@ void display_processes(const ProcessInfo processes[], int count, int scroll_offs
            "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "STATE", "COMMAND");
     printf(COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ─────────────────────────────────────────────\n" COLOR_RESET);
     
-    // Show processes with scrolling support (20 visible at a time)
-    const int VISIBLE_PROCESSES = 20;
+    // Show processes with scrolling support
     int start_index = scroll_offset;
-    int end_index = (start_index + VISIBLE_PROCESSES > count) ? count : start_index + VISIBLE_PROCESSES;
+    int end_index = (start_index + visible_processes > count) ? count : start_index + visible_processes;
     int display_count = end_index - start_index;
     
     for (int i = 0; i < display_count; i++) {
@@ -129,7 +128,7 @@ void display_processes(const ProcessInfo processes[], int count, int scroll_offs
     }
     
     // Show scroll position info
-    if (count > VISIBLE_PROCESSES) {
+    if (count > visible_processes) {
         printf("\n");
         printf(COLOR_BOLD "  Showing %d-%d of %d processes" COLOR_RESET, 
                start_index + 1, end_index, count);

@@ -12,6 +12,7 @@
 #include "../include/process_monitor.h"
 #include "../include/display.h"
 #include "../include/signal_handler.h"
+#include "../include/config.h"
 
 extern volatile sig_atomic_t keep_running;
 
@@ -88,6 +89,11 @@ int main() {
     setup_signal_handler();
     setup_terminal();
     
+    // Load configuration
+    const char* config_path = config_get_path();
+    config_load(config_path);
+    config_apply_theme(global_config.theme);
+    
     ProcessInfo processes[MAX_PROCESS];
     ProcessInfo filtered_processes[MAX_PROCESS];
     sysinfo_t sysinfo;
@@ -95,10 +101,11 @@ int main() {
     SortMode current_sort = SORT_BY_MEM;
     char filter_user[MAX_NAME_LEN] = "";
     int refresh_counter = 0;
-    const int REFRESH_INTERVAL = 20;
+    const int REFRESH_INTERVAL = global_config.refresh_interval * 10;  // Convert seconds to 100ms ticks
     int process_count = 0;  // Store for search feature
     int scroll_offset = 0;  // Current scroll position
     int display_count = 0;  // Number of processes after filtering
+    const int VISIBLE_PROCESSES = global_config.visible_processes;  // How many to show per page
     
     while (keep_running) {
         char key = get_keypress();
@@ -112,20 +119,20 @@ int main() {
                     }
                     break;
                 case 'x':  // Down arrow
-                    if (scroll_offset < display_count - 20 && display_count > 20) {
+                    if (scroll_offset < display_count - VISIBLE_PROCESSES && display_count > VISIBLE_PROCESSES) {
                         scroll_offset++;
                         refresh_counter = REFRESH_INTERVAL;
                     }
                     break;
                 case 'W':  // Page Up
-                    scroll_offset -= 20;
+                    scroll_offset -= VISIBLE_PROCESSES;
                     if (scroll_offset < 0) scroll_offset = 0;
                     refresh_counter = REFRESH_INTERVAL;
                     break;
                 case 'X':  // Page Down
-                    scroll_offset += 20;
-                    if (scroll_offset > display_count - 20) {
-                        scroll_offset = (display_count > 20) ? display_count - 20 : 0;
+                    scroll_offset += VISIBLE_PROCESSES;
+                    if (scroll_offset > display_count - VISIBLE_PROCESSES) {
+                        scroll_offset = (display_count > VISIBLE_PROCESSES) ? display_count - VISIBLE_PROCESSES : 0;
                     }
                     refresh_counter = REFRESH_INTERVAL;
                     break;
@@ -134,7 +141,7 @@ int main() {
                     refresh_counter = REFRESH_INTERVAL;
                     break;
                 case 'e':  // End
-                    scroll_offset = (display_count > 20) ? display_count - 20 : 0;
+                    scroll_offset = (display_count > VISIBLE_PROCESSES) ? display_count - VISIBLE_PROCESSES : 0;
                     refresh_counter = REFRESH_INTERVAL;
                     break;
                 case 'p':
@@ -311,13 +318,13 @@ int main() {
             sort_processes(display_processes_ptr, display_count, current_sort);
             
             // Adjust scroll offset if out of bounds after refresh
-            if (scroll_offset > display_count - 20 && display_count > 20) {
-                scroll_offset = display_count - 20;
+            if (scroll_offset > display_count - VISIBLE_PROCESSES && display_count > VISIBLE_PROCESSES) {
+                scroll_offset = display_count - VISIBLE_PROCESSES;
             }
             if (scroll_offset < 0) scroll_offset = 0;
             
             display_system_info(&sysinfo);
-            display_processes(display_processes_ptr, display_count, scroll_offset);
+            display_processes(display_processes_ptr, display_count, scroll_offset, VISIBLE_PROCESSES);
             display_command_menu(current_sort, strlen(filter_user) > 0 ? filter_user : NULL, 
                                scroll_offset, display_count);
             
