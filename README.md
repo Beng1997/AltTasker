@@ -1,11 +1,11 @@
 # AltTasker
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/badge/version-2.2-blue.svg)](https://github.com/Beng1997/AltTasker/releases)
+[![Version](https://img.shields.io/badge/version-2.3-blue.svg)](https://github.com/Beng1997/AltTasker/releases)
 [![Platform](https://img.shields.io/badge/platform-Linux-lightgrey.svg)](https://github.com/Beng1997/AltTasker)
 [![Language](https://img.shields.io/badge/language-C-orange.svg)](https://github.com/Beng1997/AltTasker)
 
-A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your system processes with a beautiful, colorful terminal interface.
+A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your system processes with a beautiful, colorful terminal interface featuring **custom themes**, **process trees**, and **persistent configuration**.
 
 **Platform Support:** Native Linux systems (Ubuntu, Debian, Fedora, Arch, etc.) and WSL (Windows Subsystem for Linux).
 
@@ -16,13 +16,22 @@ A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your sy
 - 🎨 **Colorful terminal UI** - Beautiful ANSI colors with progress bars
 - 💾 **Memory usage visualization** - Visual bars showing memory consumption
 - ⚡ **Fast and efficient** - Lightweight C implementation with minimal overhead
-- 🎯 **Top processes view** - Shows top 20 processes by memory usage
+- 🎯 **Top processes view** - Shows top 20 processes by memory usage (configurable)
 
-### Interactive Commands (v2.2)
+### New in v2.3 🎉
+- ⚙️ **Configuration System** - Persistent settings in `~/.alttaskerrc`
+- 🎨 **Custom Color Themes** - 5 themes: default/dark/light/colorblind/custom (press **T**)
+- 📈 **Improved CPU%** - Real-time CPU percentage calculation
+- 🔍 **Advanced Filtering** - Filter by name, state, memory threshold
+- 🌳 **Process Tree View** - Parent-child hierarchy display (press **V**)
+
+### Interactive Commands
 - 🔄 **Sorting** - Sort by PID (P), CPU (C), Memory (M), User (U)
 - 🔍 **Filtering** - Filter by username (F), reset filters (R)
 - 🎮 **Process Control** - Kill processes (K), search (S)
 - 📜 **Scrolling** - Navigate with Arrow keys, Page Up/Down, Home/End
+- 🎨 **Themes** - Cycle color themes (T)
+- 🌳 **Tree View** - Toggle process hierarchy (V)
 - ⌨️ **Hotkey Integration** - Optional Ctrl+Alt+Delete support (systemd)
 
 ### Display Features
@@ -30,6 +39,7 @@ A lightweight, `htop`-style **Linux task monitor** written in C. Monitor your sy
 - 📍 **Position tracking** - "Showing X-Y of Z processes"
 - 🎨 **Color coding** - Green (running), Yellow (disk wait), Red (zombie)
 - 📊 **System overview** - Uptime, process count, memory usage bar
+- 🌈 **Theme customization** - Choose your preferred color scheme
 
 ## 🚀 Quick Start
 
@@ -182,11 +192,15 @@ Once running, use these keyboard shortcuts:
 - `M` - Sort by Memory usage (default)
 - `U` - Sort by User/Owner
 
-#### Navigation (v2.2)
+#### Navigation
 - `↑` / `↓` - Scroll up/down one line
-- `Page Up` / `Page Down` - Scroll one page (20 lines)
+- `Page Up` / `Page Down` - Scroll one page (configurable, default: 20)
 - `Home` - Jump to top of list
 - `End` - Jump to bottom of list
+
+#### Customization (v2.3) 🎨
+- `T` - Cycle color themes (default → dark → light → colorblind → custom)
+- `V` - Toggle process tree view (show parent-child hierarchy)
 
 #### Filtering & Actions
 - `F` - Filter processes by username
@@ -194,6 +208,27 @@ Once running, use these keyboard shortcuts:
 - `K` - Kill selected process (requires sudo)
 - `S` - Search for process by name
 - `Q` - Quit application
+
+### Configuration File (v2.3)
+
+AltTasker automatically creates `~/.alttaskerrc` on first run. Edit this file to customize:
+
+```ini
+# Refresh interval in seconds (1-10)
+refresh_interval=2
+
+# Number of visible processes per page (10-100)
+visible_processes=20
+
+# Default sort key: P (PID), C (CPU), M (Memory), U (User)
+default_sort=M
+
+# Show process tree view: true or false
+show_tree_view=false
+
+# Color theme: default, dark, light, colorblind, custom
+theme=default
+```
 
 ### What You'll See
 
