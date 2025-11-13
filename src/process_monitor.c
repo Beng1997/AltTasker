@@ -60,20 +60,26 @@ int get_process_info(pid_t pid, ProcessInfo *pinfo, unsigned long total_mem) {
     unsigned long utime, stime;
     unsigned long long starttime;
     long rss_pages;
+    int ppid;
     
-    if (fscanf(fp, "%*d (%255[^)]) %c %*d %*d %*d %*d %*d %*u %*lu %*lu %*lu %*lu %lu %lu %*ld %*ld %*d %*d %*d %*d %llu %lu %ld",
+    if (fscanf(fp, "%*d (%255[^)]) %c %d %*d %*d %*d %*d %*u %*lu %*lu %*lu %*lu %lu %lu %*ld %*ld %*d %*d %*d %*d %llu %lu %ld",
                pinfo->name,      // Process name (between parentheses)
                &pinfo->state,    // Process state (R, S, D, Z, T, etc.)
+               &ppid,            // Parent process ID
                &utime,           // CPU time in user mode (jiffies)
                &stime,           // CPU time in kernel mode (jiffies)
                &starttime,       // Start time since boot (jiffies)
                &pinfo->vsize,    // Virtual memory size (bytes)
                &rss_pages        // Resident Set Size (pages)
-    ) < 7) {
+    ) < 8) {
         fclose(fp);
         return -1;
     }
     fclose(fp);
+    
+    // Store parent PID
+    pinfo->ppid = ppid;
+    pinfo->tree_depth = 0;  // Will be calculated later if needed
     
     // Convert RSS from pages to bytes (typically 4096 bytes per page)
     pinfo->rss = rss_pages * sysconf(_SC_PAGESIZE);
@@ -406,4 +412,37 @@ int filter_processes_advanced(const ProcessInfo processes[], int count,
     }
     
     return filtered_count;
+}
+
+void build_process_tree(ProcessInfo processes[], int count) {
+    if (!processes || count <= 0) return;
+    
+    // First pass: reset all depths
+    for (int i = 0; i < count; i++) {
+        processes[i].tree_depth = 0;
+    }
+    
+    // Calculate depth for each process by walking up parent chain
+    for (int i = 0; i < count; i++) {
+        int depth = 0;
+        pid_t current_ppid = processes[i].ppid;
+        
+        // Walk up the parent chain (max 50 levels to prevent infinite loops)
+        for (int level = 0; level < 50 && current_ppid > 0; level++) {
+            // Find parent in the array
+            bool found = false;
+            for (int j = 0; j < count; j++) {
+                if (processes[j].pid == current_ppid) {
+                    current_ppid = processes[j].ppid;
+                    depth++;
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) break;  // Parent not in our list
+        }
+        
+        processes[i].tree_depth = depth;
+    }
 }

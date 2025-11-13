@@ -103,4 +103,12 @@ int filter_processes_advanced(const ProcessInfo processes[], int count,
                                const char* name_filter, char state_filter,
                                float mem_threshold_mb);
 
+/**
+ * @brief Builds process tree by calculating tree depth for each process.
+ * 
+ * @param processes Array of processes to build tree for.
+ * @param count Number of processes.
+ */
+void build_process_tree(ProcessInfo processes[], int count);
+
 #endif // PROCESS_MONITOR_H

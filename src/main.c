@@ -176,6 +176,13 @@ int main() {
                     config_save(config_path);
                     refresh_counter = REFRESH_INTERVAL;
                     break;
+                case 'v':
+                case 'V':
+                    // Toggle tree view
+                    global_config.show_tree_view = !global_config.show_tree_view;
+                    config_save(config_path);
+                    refresh_counter = REFRESH_INTERVAL;
+                    break;
                 case 'f':
                 case 'F':
                     printf("\x1b[2J\x1b[H");
@@ -312,6 +319,11 @@ int main() {
             get_system_info(&sysinfo);
             
             process_count = scan_processes(processes, MAX_PROCESS, sysinfo.total_mem);
+            
+            // Build process tree if enabled
+            if (global_config.show_tree_view) {
+                build_process_tree(processes, process_count);
+            }
             
             ProcessInfo* display_processes_ptr;
             if (strlen(filter_user) > 0) {

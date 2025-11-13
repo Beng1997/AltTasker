@@ -38,6 +38,7 @@ typedef enum {
 
 typedef struct {
     pid_t pid;
+    pid_t ppid;  // Parent process ID
     char name[MAX_NAME_LEN];
     char cmdline[MAX_CMDLINE_LEN];
     char state; // Process state
@@ -50,6 +51,7 @@ typedef struct {
     float mem_usage;
     unsigned long utime;  // CPU time in user mode (for tracking)
     unsigned long stime;  // CPU time in kernel mode (for tracking)
+    int tree_depth;  // Depth in process tree (0 = root)
 } ProcessInfo; // Process information structure
 
 typedef struct {

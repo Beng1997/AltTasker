@@ -82,16 +82,37 @@ void display_processes(const ProcessInfo processes[], int count, int scroll_offs
             strncpy(user_short, processes[proc_index].user, sizeof(user_short));
         }
         
-        // Truncate cmdline if too long
-        size_t cmdline_len = strlen(processes[proc_index].cmdline);
+        // Truncate cmdline if too long (account for tree indentation)
+        int tree_indent = processes[proc_index].tree_depth * 2;  // 2 chars per level
+        int max_cmd_len = 44 - tree_indent;
+        if (max_cmd_len < 10) max_cmd_len = 10;  // Minimum space for command
+        
+        // Build tree prefix
+        char tree_prefix[64] = "";
+        if (global_config.show_tree_view && processes[proc_index].tree_depth > 0) {
+            for (int d = 0; d < processes[proc_index].tree_depth && d < 20; d++) {
+                if (d == processes[proc_index].tree_depth - 1) {
+                    strcat(tree_prefix, "└─");
+                } else {
+                    strcat(tree_prefix, "  ");
+                }
+            }
+        }
+        
+        // Format command with tree prefix
+        char cmdline_with_tree[128];
+        snprintf(cmdline_with_tree, sizeof(cmdline_with_tree), "%s%s", 
+                 tree_prefix, processes[proc_index].cmdline);
+        
+        size_t cmdline_len = strlen(cmdline_with_tree);
         if (cmdline_len > 44) {
-            strncpy(cmdline_short, processes[proc_index].cmdline, 41);
+            strncpy(cmdline_short, cmdline_with_tree, 41);
             cmdline_short[41] = '.';
             cmdline_short[42] = '.';
             cmdline_short[43] = '.';
             cmdline_short[44] = '\0';
         } else {
-            strncpy(cmdline_short, processes[proc_index].cmdline, sizeof(cmdline_short) - 1);
+            strncpy(cmdline_short, cmdline_with_tree, sizeof(cmdline_short) - 1);
             cmdline_short[sizeof(cmdline_short) - 1] = '\0';
         }
 
