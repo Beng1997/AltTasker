@@ -11,16 +11,17 @@
  * @param max_processes 
  * @return int 
  */
-int scan_processes(ProcessInfo processes[], int max_processes);
+int scan_processes(ProcessInfo processes[], int max_processes, unsigned long total_mem);
 
 /** 
  * @brief Retrieves information about a specific process given its PID.
  * 
  * @param pid The process ID.
  * @param pinfo Pointer to a ProcessInfo structure to store the process information.
+ * @param total_mem Total system memory in bytes, used to calculate memory percentage.
  * @return int Returns 0 on success, or a negative value on failure.
  */
-int get_process_info(pid_t pid, ProcessInfo *pinfo);
+int get_process_info(pid_t pid, ProcessInfo *pinfo, unsigned long total_mem);
 
 /**
  * @brief Checks if a given string represents a valid process ID (PID).
@@ -41,7 +42,7 @@ int is_pid(const char* str);
 int get_uid(const char* username, uid_t* uid);
 
 
-/** 
+/**
  * @brief Retrieves the command line of a process given its PID.
  * 
  * This function reads the command line arguments from /proc/[pid]/cmdline
@@ -54,5 +55,14 @@ int get_uid(const char* username, uid_t* uid);
  *         or a negative value on failure.
  */
 int get_cmdline(pid_t pid, char *buffer, size_t size);
+
+/**
+ * @brief Gathers general system information like memory, uptime, and CPU usage.
+ * 
+ * Reads from /proc/meminfo and /proc/uptime to fill the sysinfo_t struct.
+ * 
+ * @param sysinfo Pointer to a sysinfo_t struct to be filled.
+ */
+void get_system_info(sysinfo_t *sysinfo);
 
 #endif // PROCESS_MONITOR_H

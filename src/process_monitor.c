@@ -1,7 +1,7 @@
 #include "process_monitor.h"
 
 
-int scan_processes(ProcessInfo processes[], int max_processes) {
+int scan_processes(ProcessInfo processes[], int max_processes, unsigned long total_mem) {
     // Validate input parameters
     if (!processes || max_processes <= 0) {
         return -1;
@@ -20,20 +20,21 @@ int scan_processes(ProcessInfo processes[], int max_processes) {
     while ((entry = readdir(proc_dir)) != NULL && count < max_processes) {
         if (is_pid(entry->d_name)) {
             pid_t pid = (pid_t)atoi(entry->d_name);
-            if (get_process_info(pid, &processes[count]) == 0) {
+            // Pass total_mem to get_process_info for efficient memory % calculation
+            if (get_process_info(pid, &processes[count], total_mem) == 0) {
                 count++;
             }
         }
     }
     
     closedir(proc_dir);
-    return count;  // Return number of processes scanned, not 0!
+    return count;  // Return number of processes scanned
 }
 
 
 
 
-int get_process_info(pid_t pid, ProcessInfo *pinfo) {
+int get_process_info(pid_t pid, ProcessInfo *pinfo, unsigned long total_mem) {
     if (!pinfo) return -1;
     
     char path[BUFFER_SIZE];
@@ -114,53 +115,19 @@ int get_process_info(pid_t pid, ProcessInfo *pinfo) {
     // ========================================================================
     // 3. Read from /proc/[pid]/cmdline - contains full command line
     // ========================================================================
-    snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
-    fp = fopen(path, "r");
-    if (fp) {
-        size_t bytes_read = fread(pinfo->cmdline, 1, MAX_CMDLINE_LEN - 1, fp);
-        fclose(fp);
-        
-        if (bytes_read > 0) {
-            // cmdline has null-separated arguments, replace nulls with spaces
-            for (size_t i = 0; i < bytes_read - 1; i++) {
-                if (pinfo->cmdline[i] == '\0') {
-                    pinfo->cmdline[i] = ' ';
-                }
-            }
-            pinfo->cmdline[bytes_read] = '\0';
-            
-            // Remove trailing spaces
-            while (bytes_read > 0 && pinfo->cmdline[bytes_read - 1] == ' ') {
-                pinfo->cmdline[--bytes_read] = '\0';
-            }
-        } else {
-            // If cmdline is empty, use the process name in brackets (kernel threads)
-            snprintf(pinfo->cmdline, MAX_CMDLINE_LEN, "[%s]", pinfo->name);
-        }
-    } else {
-        // If cmdline cannot be read, use process name
+    get_cmdline(pid, pinfo->cmdline, MAX_CMDLINE_LEN);
+    if (pinfo->cmdline[0] == '\0') {
+        // If cmdline is empty, use the process name in brackets (kernel threads)
         snprintf(pinfo->cmdline, MAX_CMDLINE_LEN, "[%s]", pinfo->name);
     }
     
     // ========================================================================
     // 4. Calculate memory usage percentage
     // ========================================================================
-    // Read total memory from /proc/meminfo
-    fp = fopen("/proc/meminfo", "r");
-    if (fp) {
-        unsigned long total_mem_kb = 0;
-        while (fgets(buffer, sizeof(buffer), fp)) {
-            if (sscanf(buffer, "MemTotal: %lu kB", &total_mem_kb) == 1) {
-                break;
-            }
-        }
-        fclose(fp);
-        
-        if (total_mem_kb > 0) {
-            // Convert RSS from bytes to KB and calculate percentage
-            unsigned long rss_kb = pinfo->rss / 1024;
-            pinfo->mem_usage = (float)rss_kb / (float)total_mem_kb * 100.0f;
-        }
+    if (total_mem > 0) {
+        pinfo->mem_usage = (float)pinfo->rss / (float)total_mem * 100.0f;
+    } else {
+        pinfo->mem_usage = 0.0f;
     }
     
     return 0;
@@ -234,4 +201,54 @@ int get_cmdline(pid_t pid, char *buffer, size_t size) {
     }
     
     return (int)bytes_read;  // Return number of bytes written
+}
+
+void get_system_info(sysinfo_t *sysinfo) {
+    if (!sysinfo) return;
+    
+    FILE *fp;
+    char buffer[BUFFER_SIZE];
+    
+    // Initialize
+    memset(sysinfo, 0, sizeof(sysinfo_t));
+    
+    // Read memory info from /proc/meminfo
+    fp = fopen("/proc/meminfo", "r");
+    if (fp) {
+        unsigned long total_mem = 0, free_mem = 0, buffers = 0, cached = 0;
+        while (fgets(buffer, sizeof(buffer), fp)) {
+            if (sscanf(buffer, "MemTotal: %lu kB", &total_mem) == 1) sysinfo->total_mem = total_mem * 1024;
+            if (sscanf(buffer, "MemFree: %lu kB", &free_mem) == 1) sysinfo->free_mem = free_mem * 1024;
+            if (sscanf(buffer, "Buffers: %lu kB", &buffers) == 1) {} // Part of free
+            if (sscanf(buffer, "Cached: %lu kB", &cached) == 1) {}   // Part of free
+        }
+        fclose(fp);
+        
+        sysinfo->used_mem = sysinfo->total_mem - sysinfo->free_mem;
+        if (sysinfo->total_mem > 0) {
+            sysinfo->mem_usage_percent = (float)sysinfo->used_mem / sysinfo->total_mem * 100.0f;
+        }
+    }
+    
+    // Read uptime from /proc/uptime
+    fp = fopen("/proc/uptime", "r");
+    if (fp) {
+        double uptime_seconds;
+        if (fscanf(fp, "%lf", &uptime_seconds) == 1) {
+            sysinfo->uptime = (unsigned long)uptime_seconds;
+        }
+        fclose(fp);
+    }
+    
+    // Count total processes by scanning /proc directory
+    DIR *proc_dir = opendir(PROC_DIR);
+    if (proc_dir) {
+        struct dirent *entry;
+        while ((entry = readdir(proc_dir)) != NULL) {
+            if (is_pid(entry->d_name)) {
+                sysinfo->total_processes++;
+            }
+        }
+        closedir(proc_dir);
+    }
 }

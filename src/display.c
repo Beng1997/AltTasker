@@ -8,56 +8,101 @@ void display_system_info(const sysinfo_t* sysinfo) {
     char used_mem_str[32]; 
     char free_mem_str[32];
     char uptime_str[64];
-    char mem_colored[64];
-    char cpu_colored[64];
 
     format_memory(sysinfo->total_mem, total_mem_str, sizeof(total_mem_str));
     format_memory(sysinfo->used_mem, used_mem_str, sizeof(used_mem_str));
     format_memory(sysinfo->free_mem, free_mem_str, sizeof(free_mem_str));
     format_uptime(sysinfo->uptime, uptime_str, sizeof(uptime_str));
-    apply_color(sysinfo->mem_usage_percent, mem_colored, sizeof(mem_colored));
-    apply_color(sysinfo->cpu_usage_percent, cpu_colored, sizeof(cpu_colored));
 
-    printf(COLOR_BOLD "System Information:\n" COLOR_RESET);
-    printf("Uptime: %s\n", uptime_str);
-    printf("Total Memory: %s\n", total_mem_str);
-    printf("Used Memory: %s\n", used_mem_str);
-    printf("Free Memory: %s\n", free_mem_str);
-    printf("Memory Usage: %s\n", mem_colored);
-    printf("CPU Usage: %s\n", cpu_colored);
-    printf("Total Processes: %u\n", sysinfo->total_processes);
+    // Create colored bars for memory usage
+    const char* mem_color = (sysinfo->mem_usage_percent < 50.0f) ? COLOR_GREEN :
+                            (sysinfo->mem_usage_percent < 75.0f) ? COLOR_YELLOW : COLOR_RED;
+    
+    // Header with system name
+    printf(COLOR_BOLD COLOR_CYAN "╔══════════════════════════════════════════════════════════════════════════════╗\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_CYAN "║" COLOR_RESET COLOR_BOLD "                            AltTasker - System Monitor                        " COLOR_CYAN "║\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_CYAN "╚══════════════════════════════════════════════════════════════════════════════╝\n" COLOR_RESET);
     printf("\n");
+    
+    // System info in a nice format
+    printf(COLOR_BOLD "  Uptime: " COLOR_RESET "%s" COLOR_BOLD "    |    " COLOR_RESET "Processes: " COLOR_BOLD "%u\n" COLOR_RESET, 
+           uptime_str, sysinfo->total_processes);
+    printf("\n");
+    
+    // Memory bar
+    printf(COLOR_BOLD "  Memory Usage: " COLOR_RESET);
+    printf("%s%.1f%%" COLOR_RESET " [%s / %s]\n", 
+           mem_color, sysinfo->mem_usage_percent, used_mem_str, total_mem_str);
+    
+    // Visual memory bar
+    int bar_width = 60;
+    int filled = (int)((sysinfo->mem_usage_percent / 100.0f) * bar_width);
+    printf("  [");
+    for (int i = 0; i < bar_width; i++) {
+        if (i < filled) {
+            printf("%s█" COLOR_RESET, mem_color);
+        } else {
+            printf("░");
+        }
+    }
+    printf("]\n\n");
 }
 
 
 void display_processes(const ProcessInfo processes[], int count) {
     if (!processes || count <= 0) return;
 
-    printf(COLOR_BOLD "PID\tUSER\tCPU%%\tMEM%%\tVSZ\tRSS\tSTATE\tCOMMAND\n" COLOR_RESET);
-    for (int i = 0; i < count; i++) {
-        char vsize_str[32];
-        char rss_str[32];
-        char cmdline_short[64];
+    // Table header with better formatting and colors
+    printf(COLOR_BOLD COLOR_CYAN "  %-6s %-10s %6s %6s %10s %10s %5s  %-40s\n" COLOR_RESET,
+           "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "S", "COMMAND");
+    printf(COLOR_BOLD COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ────────────────────────────────────────\n" COLOR_RESET);
+    
+    // Show top processes (limit to 30 for readability)
+    int display_count = (count > 30) ? 30 : count;
+    
+    for (int i = 0; i < display_count; i++) {
+        char vsize_str[16];
+        char rss_str[16];
+        char cmdline_short[50];
+        char user_short[11]; // 10 chars + null terminator
 
         format_memory(processes[i].vsize, vsize_str, sizeof(vsize_str));
         format_memory(processes[i].rss, rss_str, sizeof(rss_str));
         
+        // Truncate username if too long
+        if (strlen(processes[i].user) > 10) {
+            strncpy(user_short, processes[i].user, 9);
+            user_short[9] = '+';
+            user_short[10] = '\0';
+        } else {
+            strncpy(user_short, processes[i].user, sizeof(user_short));
+        }
+        
         // Truncate cmdline if too long
         size_t cmdline_len = strlen(processes[i].cmdline);
-        if (cmdline_len > 60) {
-            strncpy(cmdline_short, processes[i].cmdline, 57);
-            cmdline_short[57] = '.';
-            cmdline_short[58] = '.';
-            cmdline_short[59] = '.';
-            cmdline_short[60] = '\0';
+        if (cmdline_len > 47) {
+            strncpy(cmdline_short, processes[i].cmdline, 44);
+            cmdline_short[44] = '.';
+            cmdline_short[45] = '.';
+            cmdline_short[46] = '.';
+            cmdline_short[47] = '\0';
         } else {
             strncpy(cmdline_short, processes[i].cmdline, sizeof(cmdline_short) - 1);
             cmdline_short[sizeof(cmdline_short) - 1] = '\0';
         }
 
-        printf("%d\t%s\t%.2f\t%.2f\t%s\t%s\t%s%c%s\t%s\n",
+        // Color code based on memory usage
+        const char* row_color = "";
+        if (processes[i].mem_usage > 5.0f) {
+            row_color = COLOR_RED;
+        } else if (processes[i].mem_usage > 2.0f) {
+            row_color = COLOR_YELLOW;
+        }
+
+        printf("%s  %-6d %-10s %6.1f %6.2f %10s %10s %s%c%s     %-40s%s\n",
+               row_color,
                processes[i].pid,
-               processes[i].user,
+               user_short,
                processes[i].cpu_usage,
                processes[i].mem_usage,
                vsize_str,
@@ -65,9 +110,16 @@ void display_processes(const ProcessInfo processes[], int count) {
                get_state_color(processes[i].state),
                processes[i].state,
                COLOR_RESET,
-               cmdline_short);
+               cmdline_short,
+               COLOR_RESET);
     }
+    
+    if (count > display_count) {
+        printf(COLOR_BOLD "\n  ... and %d more processes\n" COLOR_RESET, count - display_count);
+    }
+    
     printf("\n");
+    printf(COLOR_BOLD "  Press " COLOR_GREEN "Ctrl+C" COLOR_RESET COLOR_BOLD " to exit\n" COLOR_RESET);
 }
 
 void format_memory(unsigned long size, char* buffer, size_t buffer_size) {
