@@ -41,9 +41,9 @@ int main() {
     // The loop continues as long as the 'running' flag is 1.
     // The signal handler will set it to 0 to terminate the loop.
     while (running) {
-        // Clear the screen and move cursor to top-left (use alternate screen)
-        printf("\x1b[H");  // Move to home position
-        printf("\x1b[J");  // Clear from cursor to end of screen
+        // Clear entire screen and move to top
+        printf("\x1b[2J");  // Clear entire screen
+        printf("\x1b[H");   // Move cursor to home (1,1)
 
         // Get current system and process information
         get_system_info(&sysinfo);
@@ -95,6 +95,14 @@ void setup_terminal(void) {
     // Apply the new settings
     tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
     
+    // Enter alternate screen buffer (like htop does)
+    printf("\x1b[?1049h");
+    
     // Hide the cursor
     printf("\x1b[?25l");
+    
+    // Clear screen
+    printf("\x1b[2J\x1b[H");
+    
+    fflush(stdout);
 }

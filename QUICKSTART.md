@@ -1,15 +1,21 @@
 # 🚀 AltTasker Quick Start Guide
 
-## What's New (Latest Update)
+## What's New (Latest Update v2.1)
 
-✨ **Major UI Improvements:**
-- Beautiful colored interface with progress bars
-- Better screen management (no more scrolling mess!)
-- Top 30 processes displayed by default
-- Color-coded process table based on memory usage
-- Fixed "Total Processes" counter
-- Cleaner header and footer design
-- 2-second refresh interval for better readability
+✨ **Fixed Display Issues:**
+- ✅ **Screen properly refreshes in place** (no more scrolling!)
+- ✅ Uses alternate screen buffer (like htop/vim)
+- ✅ Better color coding for process states
+- ✅ STATE column shows descriptive text (RUN, SLEEP, DISK, ZOMBI, etc.)
+- ✅ Improved table alignment
+- ✅ Fixed terminal cleanup on exit
+
+🎨 **Enhanced Colors:**
+- Green: Running processes, low usage
+- Yellow: Disk wait, medium usage (2-5% memory)
+- Red: Zombie/dead processes, high usage (>5% memory)
+- Cyan: Headers and system info
+- Blue: Idle processes
 
 ## Quick Run
 

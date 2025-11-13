@@ -36,22 +36,21 @@ void handle_termination_signal(int signo) {
 }
 
 void cleanup(void) {
-    // 1. Move cursor to bottom of screen and add newlines
-    printf("\n\n");
+    // 1. Clear screen one last time
+    printf("\x1b[2J\x1b[H");
     
-    // 2. Restore original terminal settings (very important!)
+    // 2. Make the cursor visible again
+    printf("\x1b[?25h");
+    
+    // 3. Exit alternate screen buffer (return to normal terminal)
+    printf("\x1b[?1049l");
+    
+    // 4. Restore original terminal settings (very important!)
     // This brings back canonical mode and character echoing.
     tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
     
-    // 3. Make the cursor visible again
-    printf("\x1b[?25h");
-    
-    // 4. Clear the screen and move cursor to top-left
-    printf("\x1b[2J\x1b[H");
-    
-    // 5. Free any dynamically allocated memory (if any)
-    // e.g., free(some_allocated_memory);
-    
+    // 5. Print goodbye message
+    printf("\n");
     printf(COLOR_CYAN "═══════════════════════════════════════\n" COLOR_RESET);
     printf(COLOR_BOLD "  AltTasker terminated successfully\n" COLOR_RESET);
     printf(COLOR_CYAN "═══════════════════════════════════════\n" COLOR_RESET);

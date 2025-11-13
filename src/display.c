@@ -53,17 +53,17 @@ void display_processes(const ProcessInfo processes[], int count) {
     if (!processes || count <= 0) return;
 
     // Table header with better formatting and colors
-    printf(COLOR_BOLD COLOR_CYAN "  %-6s %-10s %6s %6s %10s %10s %5s  %-40s\n" COLOR_RESET,
-           "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "S", "COMMAND");
-    printf(COLOR_BOLD COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ────────────────────────────────────────\n" COLOR_RESET);
+    printf(COLOR_BOLD COLOR_CYAN "  %-6s %-10s %6s %6s %10s %10s %-5s  %-45s\n" COLOR_RESET,
+           "PID", "USER", "CPU%", "MEM%", "VIRT", "RES", "STATE", "COMMAND");
+    printf(COLOR_CYAN "  ────── ────────── ────── ────── ────────── ────────── ─────  ─────────────────────────────────────────────\n" COLOR_RESET);
     
-    // Show top processes (limit to 30 for readability)
-    int display_count = (count > 30) ? 30 : count;
+    // Show top processes (limit to 25 for readability)
+    int display_count = (count > 25) ? 25 : count;
     
     for (int i = 0; i < display_count; i++) {
         char vsize_str[16];
         char rss_str[16];
-        char cmdline_short[50];
+        char cmdline_short[48];
         char user_short[11]; // 10 chars + null terminator
 
         format_memory(processes[i].vsize, vsize_str, sizeof(vsize_str));
@@ -80,12 +80,12 @@ void display_processes(const ProcessInfo processes[], int count) {
         
         // Truncate cmdline if too long
         size_t cmdline_len = strlen(processes[i].cmdline);
-        if (cmdline_len > 47) {
-            strncpy(cmdline_short, processes[i].cmdline, 44);
-            cmdline_short[44] = '.';
-            cmdline_short[45] = '.';
-            cmdline_short[46] = '.';
-            cmdline_short[47] = '\0';
+        if (cmdline_len > 44) {
+            strncpy(cmdline_short, processes[i].cmdline, 41);
+            cmdline_short[41] = '.';
+            cmdline_short[42] = '.';
+            cmdline_short[43] = '.';
+            cmdline_short[44] = '\0';
         } else {
             strncpy(cmdline_short, processes[i].cmdline, sizeof(cmdline_short) - 1);
             cmdline_short[sizeof(cmdline_short) - 1] = '\0';
@@ -98,8 +98,20 @@ void display_processes(const ProcessInfo processes[], int count) {
         } else if (processes[i].mem_usage > 2.0f) {
             row_color = COLOR_YELLOW;
         }
+        
+        // Get state description
+        const char* state_desc;
+        switch (processes[i].state) {
+            case 'R': state_desc = COLOR_GREEN "RUN  " COLOR_RESET; break;
+            case 'S': state_desc = "SLEEP"; break;
+            case 'D': state_desc = COLOR_YELLOW "DISK " COLOR_RESET; break;
+            case 'Z': state_desc = COLOR_RED "ZOMBI" COLOR_RESET; break;
+            case 'T': state_desc = COLOR_CYAN "STOP " COLOR_RESET; break;
+            case 'I': state_desc = COLOR_BLUE "IDLE " COLOR_RESET; break;
+            default:  state_desc = "?????"; break;
+        }
 
-        printf("%s  %-6d %-10s %6.1f %6.2f %10s %10s %s%c%s     %-40s%s\n",
+        printf("%s  %-6d %-10s %6.1f %6.2f %10s %10s %-5s  %-45s%s\n",
                row_color,
                processes[i].pid,
                user_short,
@@ -107,19 +119,18 @@ void display_processes(const ProcessInfo processes[], int count) {
                processes[i].mem_usage,
                vsize_str,
                rss_str,
-               get_state_color(processes[i].state),
-               processes[i].state,
-               COLOR_RESET,
+               state_desc,
                cmdline_short,
                COLOR_RESET);
     }
     
     if (count > display_count) {
-        printf(COLOR_BOLD "\n  ... and %d more processes\n" COLOR_RESET, count - display_count);
+        printf("\n");
+        printf(COLOR_BOLD "  Showing top %d of %d processes\n" COLOR_RESET, display_count, count);
     }
     
     printf("\n");
-    printf(COLOR_BOLD "  Press " COLOR_GREEN "Ctrl+C" COLOR_RESET COLOR_BOLD " to exit\n" COLOR_RESET);
+    printf(COLOR_BOLD "  Press " COLOR_GREEN "Ctrl+C" COLOR_RESET COLOR_BOLD " to exit  |  Refresh: 2s\n" COLOR_RESET);
 }
 
 void format_memory(unsigned long size, char* buffer, size_t buffer_size) {

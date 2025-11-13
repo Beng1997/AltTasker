@@ -1,5 +1,43 @@
 # AltTasker
-A lightweight CLI task manager for Linux that intercepts Ctrl-Alt-Delete to display system processes instead of rebooting
+
+A lightweight, `htop`-style Linux task monitor written in C. Monitor your system processes with a beautiful, colorful terminal interface.
+
+## ✨ Features
+
+- 📊 Real-time process monitoring
+- 🎨 Colorful terminal UI with progress bars
+- 💾 Memory usage visualization  
+- ⚡ Fast and efficient C implementation
+- 🔄 Auto-refresh every 2 seconds
+- 🎯 Shows top 25 processes by memory usage
+
+## 🚀 Quick Start (3 Simple Steps!)
+
+### 1. Open WSL Terminal (Important!)
+```bash
+# Open WSL - NOT PowerShell!
+wsl
+```
+
+### 2. Compile the Project
+```bash
+cd /mnt/d/AltTasker
+make
+```
+
+### 3. Install and Run
+```bash
+# Install the 'task' command
+./scripts/install-alias.sh
+source ~/.bashrc
+
+# Run it!
+task
+```
+
+**That's it!** Press Ctrl+C to exit.
+
+---
 
 ## 📁 Project Structure
 
@@ -51,6 +89,110 @@ AltTasker/
     ├── 📄 config.example          # Example configuration file
     └── 📄 screenshot.png          # Screenshot of the software in action
 ```
+
+---
+
+## ⚠️ IMPORTANT: Terminal Requirements
+
+**✅ DO:**
+- Run from **WSL terminal** (native Linux terminal)
+- Use Windows Terminal with WSL profile
+- Run `wsl` command first, then `task`
+
+**❌ DON'T:**
+- Run from PowerShell (causes scrolling issues)
+- Run from CMD
+- Use `RUN-IN-WSL.bat` (deprecated)
+
+### Why?
+PowerShell doesn't properly support ANSI escape codes and terminal control sequences. This causes the display to scroll instead of refresh in place.
+
+---
+
+## 🎨 Usage
+
+```bash
+# Start monitoring
+task
+
+# Exit
+Ctrl+C
+```
+
+### What You'll See
+
+- 🟢 **System Info**: Uptime, total processes, memory usage with visual bar
+- 📋 **Process Table**: Top 25 processes sorted by memory
+- 🎨 **Color Coding**:
+  - Green: Running processes / Low usage
+  - Yellow: Disk wait / Medium usage (2-5%)
+  - Red: Zombie processes / High usage (>5%)
+  - Cyan: Headers and borders
+
+---
+
+## 🛠️ Build Commands
+
+```bash
+make          # Compile the project
+make clean    # Clean build artifacts
+make rebuild  # Clean + compile
+make run      # Compile and run directly
+make install  # Install to /usr/local/bin (requires sudo)
+```
+
+---
+
+## 📚 Additional Documentation
+
+- **[SETUP.md](SETUP.md)** - Detailed setup guide
+- **[QUICKSTART.md](QUICKSTART.md)** - Quick reference
+- **[docs/RUNNING-IN-WSL-QEMU.md](docs/RUNNING-IN-WSL-QEMU.md)** - Advanced topics
+
+---
+
+## 🐛 Troubleshooting
+
+### "task: command not found"
+```bash
+source ~/.bashrc
+# Or close and reopen your terminal
+```
+
+### Screen is scrolling instead of refreshing
+You're running from PowerShell! Switch to WSL terminal:
+```bash
+wsl
+task
+```
+
+### Permission denied
+```bash
+chmod +x /mnt/d/AltTasker/alttasker
+```
+
+### Compile errors
+```bash
+# Make sure you have build tools
+sudo apt update
+sudo apt install build-essential
+```
+
+---
+
+## 📝 License
+
+MIT License - See [LICENSE](LICENSE) file for details.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Please feel free to submit issues or pull requests.
+
+---
+
+**Made with ❤️ for Linux system monitoring**
 
 ## 📋 File Descriptions
 
